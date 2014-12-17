@@ -13,11 +13,21 @@ data Feat = Masc  | Fem  | Neutr | MascOrFem
           | Fst   | Snd  | Thrd 
           | Nom   | AccOrDat 
           | Pers  | Refl | Wh 
-          | Past  | Pres | Fut   | Perf | Infl
-          | On    | With | By    | To   | From  
+          | Past  | Pres | Fut   | Perf | Infl | Te
+          | On    | With | By    | To   | From
+          | NO | De | Ni | Wo | Ga | Ha | Mo | Kara | Made | Madeni
+          | Anim  | Inanim
           deriving (Eq,Show,Ord)
 
 lexicon :: String -> [Cat]
+
+-- Should these have a CatLabel (see line 6 above) of NP or maybe Noun? They can 
+-- have relative phrases/demonstrative pronouns e.g. "kono watashi" and 
+-- "mizu wo nonde iru kare"
+lexicon "watashi"   = [Cat "watashi"    "NP" [Anim]  []]
+lexicon "anata"     = [Cat "anata"      "NP" [Anim]  []]
+lexicon "kare"      = [Cat "kare"       "NP" [Anim]  []]
+lexicon "kanojo"    = [Cat "kanojo"     "NP" [Anim]  []]
 
 lexicon "i"   = [Cat "i"   "NP" [Pers,Fst,Sg,Nom]        []]
 lexicon "me"  = [Cat "me"  "NP" [Pers,Fst,Sg,AccOrDat]   []]
@@ -34,6 +44,9 @@ lexicon "it"  = [Cat "it"  "NP" [Pers,Thrd,Sg,Neutr]     []]
 lexicon "they" = [Cat "they" "NP" [Pers,Thrd,Pl,Nom]     []]
 lexicon "them" = [Cat "them" "NP" [Pers,Thrd,Pl,AccOrDat] 
 	       	      	      []]
+
+-- Japanese doesn't really have reflexives
+lexicon "jibun" = [Cat "jibun" "NP" [Anim] []]
 
 lexicon "myself"     = 
  [Cat "myself"     "NP" [Refl,Sg,Fst,AccOrDat] []]
@@ -52,6 +65,7 @@ lexicon "itself"     =
 lexicon "themselves" = 
  [Cat "themselves" "NP" [Refl,Pl,Thrd,AccOrDat] []]
 
+ -- No relative pronouns? Only word order
 lexicon "who"     = [Cat "who" "NP"  [Wh,Thrd,MascOrFem] [], 
      Cat "who" "REL" [MascOrFem]         []]
 lexicon "whom"    = 
@@ -63,6 +77,11 @@ lexicon "that"    = [Cat "that"  "REL" []      [],
                      Cat "that"  "DET" [Sg]    []]
 lexicon "which"   = [Cat "which" "REL" [Neutr] [], 
                      Cat "which" "DET" [Wh]    []]
+
+-- Names just like normal nouns
+-- Should we treat honorifics separately? Sounds like a hassle
+lexicon "rim-san"       = [Cat "rim-san"        "NP" [Anim] []]
+lexicon "curcuru-san"   = [Cat "curcuru-san"    "NP" [Anim] []]
 
 lexicon "snowwhite"    = 
  [Cat "snowwhite"  "NP" [Thrd,Fem,Sg]  []]
@@ -77,12 +96,20 @@ lexicon "littlemook"   =
 lexicon "atreyu"       = 
  [Cat "atreyu"     "NP" [Thrd,Masc,Sg] []]
 
+
+-- Good old determiners. No features needed?
+lexicon "kono"    = [Cat "kono"    "DET" []    []]
+lexicon "sono"    = [Cat "sono"    "DET" []    []]
+lexicon "ano"     = [Cat "ano"     "DET" []    []]
+lexicon "yori"    = [Cat "yori"    "DF"  []    []]
+lexicon "nohou"   = [Cat "nohou"   "DF"  []    []]
+
 lexicon "every"   = [Cat "every"   "DET" [Sg]  []]
 lexicon "all"     = [Cat "all"     "DET" [Pl]  []]
 lexicon "some"    = [Cat "some"    "DET" []    []]
 lexicon "several" = [Cat "several" "DET" [Pl]  []]
 lexicon "a"       = [Cat "a"       "DET" [Sg]  []]
-lexicon "no"      = [Cat "no"      "DET" []    []]
+--lexicon "no"      = [Cat "no"      "DET" []    []]
 lexicon "the"     = [Cat "the"     "DET" []    []]
 
 lexicon "most"    = [Cat "most"    "DET" [Pl]  []]
@@ -94,6 +121,20 @@ lexicon "those"   = [Cat "those"   "DET" [Pl]  []]
 
 lexicon "less_than" = [Cat "less_than" "DF" [Pl] []]
 lexicon "more_than" = [Cat "more_than" "DF" [Pl] []]
+
+
+-- Nouns are cheesy easy. Do we need a CN distinction? Should pronouns and names
+-- be CN? Or just N?
+lexicon "banana"    = [Cat "banana"     "CN" [Inanim] []]
+lexicon "jitensha"  = [Cat "jitensha"   "CN" [Inanim] []]
+lexicon "arubaito"  = [Cat "arubaito"   "CN" [Inanim] []]
+lexicon "atama"     = [Cat "atama"      "CN" [Inanim] []]
+lexicon "hito"      = [Cat "hito"       "CN" [Anim]   []]
+lexicon "kuma"      = [Cat "kuma"       "CN" [Anim]   []]
+lexicon "neko"      = [Cat "neko"       "CN" [Anim]   []]
+lexicon "eki"       = [Cat "eki"        "CN" [Inanim] []]
+lexicon "sensei"    = [Cat "sensei"     "CN" [Anim]   []]
+
 
 lexicon "thing"   = [Cat "thing"   "CN" [Sg,Neutr,Thrd] []]
 lexicon "things"  = [Cat "things"  "CN" [Pl,Neutr,Thrd] []]
@@ -122,8 +163,95 @@ lexicon "swords"   = [Cat "swords"   "CN" [Pl,Neutr,Thrd] []]
 lexicon "dagger"   = [Cat "dagger"   "CN" [Sg,Neutr,Thrd] []]
 lexicon "daggers"  = [Cat "daggers"  "CN" [Pl,Neutr,Thrd] []]
 
+
+-- Auxen will need some srs consideration
+
+lexicon "imasu"      = [Cat "imasu"      "AUX" [Pres] []]
+lexicon "imashita"   = [Cat "imashita"   "AUX" [Past] []]
+lexicon "itte"       = [Cat "itte"       "AUX" [Te]   []]
+lexicon "arimasu"    = [Cat "arimasu"    "AUX" [Pres] []]
+lexicon "arimashita" = [Cat "arimashita" "AUX" [Past] []]
+lexicon "atte"       = [Cat "atte"       "AUX" [Te]   []]
+lexicon "okimasu"    = [Cat "okimasu"    "AUX" [Pres] []]
+lexicon "okimashita" = [Cat "okimashita" "AUX" [Past] []]
+lexicon "oite"       = [Cat "oite"       "AUX" [Te]   []]
+
 lexicon "did"    = [Cat "did"    "AUX" [] []]
 lexicon "didn't" = [Cat "didn't" "AUX" [] []]
+
+
+-- Function words. Should probably change the tag from PREP to POST and/or
+-- PART
+-- What exactly uses the CatLabel? I think it might be only in lexicon entries
+-- Like verbs below
+-- "No" conflicts with FSynF.hs line 33, used "NO" for now.
+
+lexicon "no"    = [Cat "no"     "PREP" [NO] []]
+lexicon "de"    = [Cat "de"     "PREP" [De] []]
+lexicon "ni"    = [Cat "ni"     "PREP" [Ni] []]
+lexicon "wo"    = [Cat "wo"     "PREP" [Wo] []]
+lexicon "ga"    = [Cat "ga"     "PREP" [Ga] []]
+lexicon "ha"    = [Cat "ha"     "PREP" [Ha] []]
+lexicon "mo"    = [Cat "mo"     "PREP" [Mo] []]
+lexicon "kara"  = [Cat "kara"   "PREP" [Kara] []]
+lexicon "made"  = [Cat "made"   "PREP" [Made] []]
+lexicon "madeni" = [Cat "madeni" "PREP" [Madeni] []]
+
+lexicon "to"    = [Cat "to"     "CONJ" [] []]
+
+
+lexicon "on"   = [Cat "on"   "PREP" [On]   []]
+lexicon "with" = [Cat "with" "PREP" [With] []]
+lexicon "by"   = [Cat "by"   "PREP" [By]   []]
+--lexicon "to"   = [Cat "to"   "PREP" [To]   []]
+lexicon "from" = [Cat "from" "PREP" [From] []]
+
+lexicon "and"   = [Cat "and"  "CONJ" [] []]
+lexicon "."     = [Cat "."    "CONJ" [] []]
+lexicon "if"    = [Cat "if"   "COND" [] []]
+lexicon "then"  = [Cat "then" "THEN" [] []]
+
+
+
+-- The cream of the crop: Verbs
+-- Is this the kind of structure we want to do with particles and nouns?
+-- Should the NPs need any features here? In the English examples it's AccOrDat,
+-- but we are selecting whether it is Acc or Dat, etc. through the use of particles
+lexicon "shinimasu" = 
+    [Cat "shinimasu" "VP" [Pres] [],
+     Cat "shinimasu" "VP" [Pres] [Cat "_" "NP" [Anim] [],
+                                  Cat "_" "PREP" [Ga] []]]
+lexicon "shinimashita" = 
+    [Cat "shinimashita" "VP" [Past] [],
+     Cat "shinimashita" "VP" [Past] [Cat "_" "NP" [Anim] [],
+                                     Cat "_" "PREP" [Ga] []]]
+lexicon "shinde" = 
+    [Cat "shinde" "VP" [Te] [],
+     Cat "shinde" "VP" [Te] [Cat "_" "NP" [Anim] [],
+                             Cat "_" "PREP" [Ga] []]]
+                             
+lexicon "koroshimasu" =
+    [Cat "koroshimasu" "VP" [Pres] [Cat "_" "NP" [Anim] [],
+                                    Cat "_" "PREP" [Wo] []],
+     Cat "koroshimasu" "VP" [Pres] [Cat "_" "NP" [Anim] [],
+                                    Cat "_" "PREP" [Wo] [],
+                                    Cat "_" "NP" [Inanim] [],
+                                    Cat "_" "PREP" [De] []]]
+lexicon "koroshimashita" =
+    [Cat "koroshimashita" "VP" [Past] [Cat "_" "NP" [Anim] [],
+                                       Cat "_" "PREP" [Wo] []],
+     Cat "koroshimashita" "VP" [Past] [Cat "_" "NP" [Anim] [],
+                                       Cat "_" "PREP" [Wo] [],
+                                       Cat "_" "NP" [Inanim] [],
+                                       Cat "_" "PREP" [De] []]]
+lexicon "koroshite" =
+    [Cat "koroshite" "VP" [Te] [Cat "_" "NP" [Anim] [],
+                                Cat "_" "PREP" [Wo] []],
+     Cat "koroshite" "VP" [Te] [Cat "_" "NP" [Anim] [],
+                                Cat "_" "PREP" [Wo] [],
+                                Cat "_" "NP" [Inanim] [],
+                                Cat "_" "PREP" [De] []]]
+
 
 lexicon "smiled"    = [Cat "smiled"    "VP" [Past] []]
 lexicon "smile"     = [Cat "smile"     "VP" [Infl]  []]
@@ -190,17 +318,6 @@ lexicon "take" =
  [Cat "take" "VP" [Infl]  [Cat "_" "NP" [AccOrDat] [],
                            Cat "_" "PP" [From]     []], 
   Cat "take" "VP" [Infl]  [Cat "_" "NP" [AccOrDat] []]] 
-
-lexicon "on"   = [Cat "on"   "PREP" [On]   []]
-lexicon "with" = [Cat "with" "PREP" [With] []]
-lexicon "by"   = [Cat "by"   "PREP" [By]   []]
-lexicon "to"   = [Cat "to"   "PREP" [To]   []]
-lexicon "from" = [Cat "from" "PREP" [From] []]
-
-lexicon "and"   = [Cat "and"  "CONJ" [] []]
-lexicon "."     = [Cat "."    "CONJ" [] []]
-lexicon "if"    = [Cat "if"   "COND" [] []]
-lexicon "then"  = [Cat "then" "THEN" [] []]
 
 lexicon "shouted"    = [Cat "shouted"    "VP" [Past] []]
 lexicon "shout"    = [Cat "shout"    "VP" [Pres,Sg,Fst] [],
