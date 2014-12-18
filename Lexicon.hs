@@ -9,51 +9,54 @@ data Cat      = Cat Phon CatLabel Agreement [Cat]
 type Agreement = [Feat]
 
 data Feat = 
-		-- gender should be simplified, number we don't need
-        Fst | Snd | Thrd | Masc | Fem
-        -- but need a lot cases and other kinds of particle
+    -- gender should be simplified, number we don't need
+    Fst | Snd | Thrd | Masc | Fem
+    -- but need a lot cases and other kinds of particle
 
-        -- these lists are from Wikipedia
-        -- http://en.wikipedia.org/wiki/Japanese_particles
-        -- Case markers 
-        -- | NO | De | Ni | Wo | Ga | Ha | Mo | Kara | Made | Madeni
-		-- が nominative の genitive を accusative に locative, dative へ ablative と で instumental から ablative より comparative
-        | Nom | Gen | Acc | Dat | Loc | Abl | Comp | Voc | Ins
-		-- Need just a few prepositional (postpositional) particle. Note that case marking and postpositionals are pretty similar..
-		| Only | Until | On | With | By
+    -- these lists are from Wikipedia
+    -- http://en.wikipedia.org/wiki/Japanese_particles
+    -- Case markers 
+    -- | NO | De | Ni | Wo | Ga | Ha | Mo | Kara | Made | Madeni
+    -- が nominative の genitive を accusative に locative, dative へ ablative と で instumental から ablative より comparative
+    | Nom | Gen | Acc | Dat | Loc | Abl | Comp | Voc | Ins
+    -- Need just a few prepositional (postpositional) particle. Note that case marking and postpositionals are pretty similar..
+    | Only | Until | On | With | By
         -- We don't want a full fledged parser, keep this simple
 
-		-- Parallel markers -- I've never seen such things
-		-- か、の、や、に、と、やら、なり、だの
+    -- Parallel markers -- I've never seen such things
+    -- か、の、や、に、と、やら、なり、だの
 
-		-- Sentence ending particles
-		-- か、の、や、な、わ、とも、かしら
-		-- Interjectory particles (間投助詞 kantō-joshi?)
-		-- さ、よ、ね
-		| Decl | Intrg | Intrj | Imper | Hypo | Caus | Pass | Neg
-		-- honorifics 
-		| Poli | Resp | Humb | Neutr | Unoff
-        -- need features for regular (non-honorific) and unofficial
-		-- Adverbial verb endings - There are too many adverbials 
-		-- and I think it's not meaningful to give each of them a different, say, semantic feature
-		-- ばかり、まで、だけ、ほど、くらい、など、なり、やら
-		| Advb
-		-- But we need syntactic features
-		| Godan | Idan | Irre 		-- Verb types
-		| Te | Nai | Masu             	-- Ending types (morphological form)
+    -- Sentence ending particles
+    -- か、の、や、な、わ、とも、かしら
+    -- Interjectory particles (間投助詞 kantō-joshi?)
+    -- さ、よ、ね
+    | Decl | Intrg | Intrj | Imper | Hypo | Caus | Pass | Neg
+    -- honorifics 
+    | Poli | Resp | Humb | Neutr | Unoff
+    -- need features for regular (non-honorific) and unofficial
+    -- Adverbial verb endings - There are too many adverbials 
+    -- not meaningful to give each of them a different, say, semantic feature
+    -- maybe we need rough dictinctions eg> temporal, spacial, manner, ...
+    -- ばかり、まで、だけ、ほど、くらい、など、なり、やら
+    | Advb 
+    -- But we need syntactic features
+    | Godan | Idan | Irre     -- Verb types
+    | Te | Nai | Masu               -- Ending types (morphological form)
         -- verb [Te] only combines ending [Te]
 
-		-- Binding particles (係助詞 kakari-joshi?)
-		-- は、も、こそ、でも、しか、さえ、だに
-		-- Conjunctive particles (接続助詞 setsuzoku-joshi?)
-		-- や、が、て、のに、ので、から、ところが、けれども
-		-- I don't know how to interpret the above in English...
+    -- Binding particles (係助詞 kakari-joshi?)
+    -- は、も、こそ、でも、しか、さえ、だに
+    -- Conjunctive particles (接続助詞 setsuzoku-joshi?)
+    -- や、が、て、のに、ので、から、ところが、けれども
+    -- I don't know how to interpret the above in English...
 
-        | Pers  | Refl | Wh 
-        -- tense and modal
-        | Past  | Pres | Fut | May | Must
-        | Anim  | Inanim
-        deriving (Eq,Show,Ord)
+    | Pers  | Refl | Wh 
+    -- tense and modal
+    | Past  | Pres | Fut | May | Must
+
+    -- misc features
+    | Anim  | Inanim
+    deriving (Eq,Show,Ord)
 
 lexicon :: String -> [Cat]
 
@@ -65,8 +68,11 @@ lexicon "watashi"   = [Cat "watashi"    "NP" [Anim, Fst, Poli]  []]
 lexicon "boku"      = [Cat "boku"       "NP" [Anim, Fst]  []]
 lexicon "anata"     = [Cat "anata"      "NP" [Anim, Snd, Poli]  []]
 lexicon "kimi"      = [Cat "kimi"       "NP" [Anim, Snd]  []]
-lexicon "kare"      = [Cat "kare"       "NP" [Anim, Thrd]  []]
-lexicon "kanojo"    = [Cat "kanojo"     "NP" [Anim, Thrd]  []]
+lexicon "kare"      = [Cat "kare"       "NP" [Anim, Thrd, Masc]  []]
+lexicon "kanojo"    = [Cat "kanojo"     "NP" [Anim, Thrd, Fem]  []]
+lexicon "kore"      = [Cat "kore"       "NP" [Inanim]    []]
+lexicon "sore"      = [Cat "sore"       "NP" [Inanim]    []]
+lexicon "are"       = [Cat "are"        "NP" [Inanim]    []]
 
 {--
 lexicon "i"   = [Cat "i"   "NP" [Pers,Fst,Sg,Nom]        []]
@@ -76,14 +82,14 @@ lexicon "us"  = [Cat "us"  "NP" [Pers,Fst,Pl,AccOrDat]   []]
 lexicon "you" = [Cat "you" "NP" [Pers,Snd]               []]
 lexicon "he"  = [Cat "he"  "NP" [Pers,Thrd,Sg,Nom,Masc]  []]
 lexicon "him" = [Cat "him" "NP" [Pers,Thrd,Sg,AccOrDat,Masc] 
-	      	     	    []]
+                    []]
 lexicon "she" = [Cat "she" "NP" [Pers,Thrd,Sg,Nom,Fem]   []]
 lexicon "her" = [Cat "her" "NP" [Pers,Thrd,Sg,AccOrDat,Fem] 
-	      	     	    []]
+                    []]
 lexicon "it"  = [Cat "it"  "NP" [Pers,Thrd,Sg,Neutr]     []]
 lexicon "they" = [Cat "they" "NP" [Pers,Thrd,Pl,Nom]     []]
 lexicon "them" = [Cat "them" "NP" [Pers,Thrd,Pl,AccOrDat] 
-	       	      	      []]
+                        []]
 --}
 
 -- Japanese doesn't really have reflexives
@@ -127,8 +133,8 @@ lexicon "which"   = [Cat "which" "REL" [Neutr] [],
 -- Names just like normal nouns
 -- Should we treat honorifics separately? Sounds like a hassle
 -- KRIM: I guess we can take vocative cases separately and make them honorific using relavant features
-lexicon "rim"       = [Cat "rim-san"        "NP" [Anim] []]
-lexicon "curcuru"   = [Cat "curcuru-san"    "NP" [Anim] []]
+lexicon "rim"       = [Cat "rim"        "NP" [Anim] []]
+lexicon "curcuru"   = [Cat "curcuru"    "NP" [Anim] []]
 
 {--
 lexicon "snowwhite"    = 
@@ -151,9 +157,6 @@ lexicon "atreyu"       =
 lexicon "kono"    = [Cat "kono"    "DET" []    []]
 lexicon "sono"    = [Cat "sono"    "DET" []    []]
 lexicon "ano"     = [Cat "ano"     "DET" []    []]
-lexicon "kore"    = [Cat "kore"    "NP" [Inanim]    []]
-lexicon "sore"    = [Cat "sore"    "NP" [Inanim]    []]
-lexicon "are"     = [Cat "are"     "NP" [Inanim]    []]
 
 -- KRIM: what do you mean by these?
 lexicon "yori"    = [Cat "yori"    "DF"  []    []]
@@ -194,7 +197,7 @@ lexicon "kuma"      = [Cat "kuma"       "NP" [Anim]   []]
 lexicon "neko"      = [Cat "neko"       "NP" [Anim]   []]
 lexicon "eki"       = [Cat "eki"        "NP" [Inanim] []]
 lexicon "sensei"    = [Cat "sensei"     "NP" [Anim]   []]
-lexicon "mono"      = [Cat "MONO"       "NP" []   []]
+lexicon "mono"      = [Cat "mono"       "NP" []   []]
 
 {--
 lexicon "thing"   = [Cat "thing"   "CN" [Sg,Neutr,Thrd] []]
@@ -338,7 +341,7 @@ lexicon "shin"  = [Cat "shi"    "VP"   [Godan] []] -- keep lexicons of stem only
 lexicon "a"     = [Cat "a"      "END"  [Godan, Nai] []] 
 lexicon "i"     = [Cat "i"      "END"  [Godan, Masu] []] 
 lexicon "e"     = [Cat "e"      "FIN"  [Godan, Neutr, Imper] []] 
--- ending 'e' transform godan verbs into shimo 1 dan. how can we represent this?
+-- ending 'e' transforms godan verbs into shimo 1 dan. how can we represent this?
 lexicon "e"     = [Cat "e"      "END"  [Godan, Idan, Neutr, May] []] 
 lexicon "ou"    = [Cat "ou"     "FIN"  [Godan, Neutr, Imper] []] 
 lexicon "ouka"  = [Cat "ouka"   "FIN"  [Godan, Neutr, Imper] []] 
@@ -351,15 +354,17 @@ lexicon "mi"       = [Cat "mi"       "VP"  [Idan, Masu] []]
 lexicon "mi"       = [Cat "mi"       "VP"  [Idan, Te] []] 
 lexicon "miru"     = [Cat "miru"     "VP"  [Idan, Neutr, Decl, Pres] []] 
 
+-- need to handle irregular 'kuru', 'suru' here
+
 -- endings
 lexicon "reru"    = [Cat "reru"     "FIN"  [Idan, Neutr, May] []] 
 lexicon "rareru"  = [Cat "rareru"   "FIN"  [Idan, Neutr, May] []] 
 lexicon "you"     = [Cat "you"      "FIN"  [Idan, Neutr, Imper] []] 
 lexicon "nai"     = [Cat "nai"      "END"  [Nai, Neg] []] 
-lexicon "masu"     = [Cat "masu"    "FIN"  [Masu] []] 
-lexicon "te"     = [Cat "te"      "FIN"  [] []] 
-lexicon "reru"     = [Cat "reru"      "FIN"  [Nai, Godan, Pass] []] 
-lexicon "seru"     = [Cat "seru"      "FIN"  [Nai, Godan, Caus] []] 
+lexicon "masu"    = [Cat "masu"     "FIN"  [Masu] []] 
+lexicon "te"      = [Cat "te"       "FIN"  [] []] 
+lexicon "reru"    = [Cat "reru"     "FIN"  [Nai, Godan, Pass] []] 
+lexicon "seru"    = [Cat "seru"     "FIN"  [Nai, Godan, Caus] []] 
 
 
 
@@ -469,14 +474,14 @@ lexicon "take" =
 
 lexicon "shouted"    = [Cat "shouted"    "VP" [Past] []]
 lexicon "shout"    = [Cat "shout"    "VP" [Pres,Sg,Fst] [],
-	Cat "shout"    "VP" [Pres,Sg,Snd] [],
-	Cat "shout"     "VP" [Pres,Pl]  [],
-	Cat "shout"     "VP" [Infl]  []]
+  Cat "shout"    "VP" [Pres,Sg,Snd] [],
+  Cat "shout"     "VP" [Pres,Pl]  [],
+  Cat "shout"     "VP" [Infl]  []]
 lexicon "shouts"    = [Cat "shouts"    "VP" [Pres,Sg,Thrd] []]
 lexicon "will_shout"    = [Cat "will_shout"    "VP" [Fut] []]
-lexicon "have_shouted"	= [Cat "have_shouted"  "VP" [Perf,Sg,Fst] [],
-	Cat "have_shouted"     "VP" [Perf,Sg,Snd] [],
-	Cat "have_shouted"     "VP" [Perf,Pl] []]
+lexicon "have_shouted"  = [Cat "have_shouted"  "VP" [Perf,Sg,Fst] [],
+  Cat "have_shouted"     "VP" [Perf,Sg,Snd] [],
+  Cat "have_shouted"     "VP" [Perf,Pl] []]
 lexicon "has_shouted"   = [Cat "has_shouted"   "VP" [Perf,Sg,Thrd] []]
 
 lexicon _ = []
