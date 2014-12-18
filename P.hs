@@ -234,6 +234,21 @@ reaction =  parseManyAs "REACTION" answer
 turn     =  parseAs "TURN" [guess,reaction]
 game     =  turn <|> parseAs "GAME" [turn,game]
 
+gender, person, gcase, pronType, tense, postType, verbType, verbEnd, verbMood, honorif, animacy
+		 :: Agreement -> Agreement
+gender   = filter (`elem` [Masc,Fem])
+person   = filter (`elem` [Fst,Snd,Thrd])
+gcase    = filter (`elem` [Nom,Gen,Acc,Dat,Loc,Abl,Comp,Voc,Ins,Top])
+pronType = filter (`elem` [Pers,Refl,Wh]) 
+tense    = filter (`elem` [Past,Pres,Fut,May,Must]) 
+postType = filter (`elem` [Only,Until,On,With,By]) 
+verbType = filter (`elem` [Godan,Idan,Irre])
+verbEnd  = filter (`elem` [Te,Nai,Masu]) 
+verbMood = filter (`elem` [Decl,Intrg,Intrj,Imper,Hypo,Caus,Pass,Nega]) 
+honorif  = filter (`elem` [Poli,Resp,Humb,Neutr,Unoff]) 
+animacy  = filter (`elem` [Anim,Inanim]) 
+
+{--
 gender, number, person, gcase, pronType, tense, prepType 
 		 :: Agreement -> Agreement
 gender   = filter (`elem` [MascOrFem,Masc,Fem,Neutr])
@@ -243,11 +258,15 @@ gcase    = filter (`elem` [Nom,AccOrDat])
 pronType = filter (`elem` [Pers,Refl,Wh]) 
 tense    = filter (`elem` [Past,Pres,Fut,Perf,Infl]) 
 prepType = filter (`elem` [On,With,By,To,From]) 
+--}
 
+-- If we don't want to keep MascOrFem, we get rid of this
+{--
 prune :: Agreement -> Agreement
 prune fs = if   (Masc `elem` fs || Fem `elem` fs)
            then (delete MascOrFem fs) 
            else fs 
+--}
 
 instance Show Cat where
   show (Cat "_"  label agr subcatlist) = label ++ show agr
@@ -268,15 +287,21 @@ subcatList (Cat _ _ _ cats) = cats
 
 combine :: Cat -> Cat -> [Agreement]
 combine cat1 cat2 = 
- [ feats | length (gender   feats) <= 1, 
-           length (number   feats) <= 1, 
+ [ feats | length (gender   feats) <= 1,  
            length (person   feats) <= 1, 
            length (gcase    feats) <= 1,
            length (pronType feats) <= 1,
            length (tense    feats) <= 1,
-           length (prepType feats) <= 1 ]
+           length (postType feats) <= 1,
+           length (verbType feats) <= 1,
+           length (verbEnd  feats) <= 1,
+           length (verbMood feats) <= 1,
+           length (honorif  feats) <= 1,
+           length (animacy  feats) <= 1]
   where 
-    feats = (prune . nub . sort) (fs cat1 ++ fs cat2)
+    feats = (nub . sort) (fs cat1 ++ fs cat2)
+    -- Will deleting prune break everything? Let's see
+    --feats = (prune . nub . sort) (fs cat1 ++ fs cat2)
 
 agree :: Cat -> Cat -> Bool
 agree cat1 cat2 = not (null (combine cat1 cat2))
@@ -372,6 +397,15 @@ npRule = \ xs ->
 parseNP :: PARSER Cat Cat
 parseNP = leafP "NP" <|> npRule
 
+-- Need a new ppRule
+ppRule :: PARSER Cat Cat
+ppRule = \ xs -> 
+   [ (Branch (Cat "_" "PP" fs []) [prep,np'],zs) | 
+     (prep,ys) <- parsePrep xs, 
+     (np,zs)   <- parseNP ys,
+      np'      <- assignT Acc np, 
+      fs       <- combine (t2c prep) (t2c np') ]
+{--
 ppRule :: PARSER Cat Cat
 ppRule = \ xs -> 
    [ (Branch (Cat "_" "PP" fs []) [prep,np'],zs) | 
@@ -379,6 +413,7 @@ ppRule = \ xs ->
      (np,zs)   <- parseNP ys,
       np'      <- assignT AccOrDat np, 
       fs       <- combine (t2c prep) (t2c np') ]
+--}
 
 parsePP :: PARSER Cat Cat
 parsePP = ppRule 
@@ -402,7 +437,8 @@ parseAux :: PARSER Cat Cat
 parseAux = leafP "AUX"
 
 parseVP :: PARSER Cat Cat 
-parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> finPerfVpRule <|> auxVpRule
+parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> auxVpRule
+--parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> finPerfVpRule <|> auxVpRule
 
 vpRule :: PARSER Cat Cat
 vpRule = \xs -> 
@@ -432,16 +468,29 @@ finFutVpRule :: PARSER Cat Cat
 finFutVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs, 
 	       	   vp'    <- assignT Fut vp ]
 
+-- No perfect
+{--
 finPerfVpRule :: PARSER Cat Cat
 finPerfVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs, 
 	      	    vp'    <- assignT Perf vp ]
+--}
 
+
+-- Need new auxVpRule - a nightmare?
 auxVpRule :: PARSER Cat Cat
 auxVpRule = \xs -> 
  [(Branch (Cat "_" "VP" (fs (t2c aux)) []) [aux,inf'],zs) | 
   (aux,ys) <- parseAux xs,
   (inf,zs) <- vpRule ys, 
-  inf'    <- assignT Infl inf ]   
+  inf'    <- assignT Must inf ] 
+{--
+auxVpRule :: PARSER Cat Cat
+auxVpRule = \xs -> 
+ [(Branch (Cat "_" "VP" (fs (t2c aux)) []) [aux,inf'],zs) | 
+  (aux,ys) <- parseAux xs,
+  (inf,zs) <- vpRule ys, 
+  inf'    <- assignT Infl inf ]  
+--}
 
 prs :: String -> [ParseTree Cat Cat]
 prs string = let ws = lexer string 
@@ -538,7 +587,8 @@ prsCN :: SPARSER Cat Cat
 prsCN = leafPS "CN" <||> cnrelR 
 
 prsVP :: SPARSER Cat Cat
-prsVP = finPastVpR <||> finPresVpR <||> finFutVpR <||> finPerfVpR <||> auxVpR
+prsVP = finPastVpR <||> finPresVpR <||> finFutVpR <||> auxVpR
+--prsVP = finPastVpR <||> finPresVpR <||> finFutVpR <||> finPerfVpR <||> auxVpR
 
 vpR :: SPARSER Cat Cat
 vpR = \us xs -> 
@@ -560,10 +610,22 @@ finFutVpR :: SPARSER Cat Cat
 finFutVpR = \us xs -> [(vp',vs,ys) | (vp,vs,ys) <- vpR us xs,
                                    vp' <- assignT Fut vp ]
 
+-- Japanese is already perfect
+{--
 finPerfVpR :: SPARSER Cat Cat
 finPerfVpR = \us xs -> [(vp',vs,ys) | (vp,vs,ys) <- vpR us xs,
                                    vp' <- assignT Perf vp ]
+--}
 
+-- More Auxen handling
+auxVpR :: SPARSER Cat Cat
+auxVpR = \us xs -> 
+     [ (Branch (Cat "_" "VP" (fs (t2c aux)) []) 
+               [aux,inf'], ws, zs) | 
+                 (aux,vs,ys) <- prsAUX us xs,
+                 (inf,ws,zs) <- vpR vs ys,
+                  inf'       <- assignT Must inf ] 
+{--
 auxVpR :: SPARSER Cat Cat
 auxVpR = \us xs -> 
      [ (Branch (Cat "_" "VP" (fs (t2c aux)) []) 
@@ -571,6 +633,7 @@ auxVpR = \us xs ->
                  (aux,vs,ys) <- prsAUX us xs,
                  (inf,ws,zs) <- vpR vs ys,
                   inf'       <- assignT Infl inf ] 
+--}
 
 prsAUX :: SPARSER Cat Cat
 prsAUX = leafPS "AUX" <||> pop "AUX" 
@@ -578,6 +641,16 @@ prsAUX = leafPS "AUX" <||> pop "AUX"
 prsPP :: SPARSER Cat Cat
 prsPP = ppR <||> pop "PP" 
 
+
+-- New ppR to consider
+ppR :: SPARSER Cat Cat
+ppR = \us xs -> 
+  [ (Branch (Cat "_" "PP" fs []) [prep,np'], ws, zs) | 
+      (prep,vs,ys) <- prsPREP us xs, 
+      (np,ws,zs)   <- prsNP vs ys,
+       np'         <- assignT Acc np, 
+       fs          <- combine (t2c prep) (t2c np') ]
+{--
 ppR :: SPARSER Cat Cat
 ppR = \us xs -> 
   [ (Branch (Cat "_" "PP" fs []) [prep,np'], ws, zs) | 
@@ -585,6 +658,7 @@ ppR = \us xs ->
       (np,ws,zs)   <- prsNP vs ys,
        np'         <- assignT AccOrDat np, 
        fs          <- combine (t2c prep) (t2c np') ]
+--}
 
 prsPREP :: SPARSER Cat Cat
 prsPREP = leafPS "PREP"
@@ -615,12 +689,22 @@ relclauseR = \us xs ->
        gap        <- [Cat "#" "NP" fs []],
        (s,ws,zs)  <- push gap prsS vs ys ]
 
+       
+-- Comparative?
+thatlessR :: SPARSER Cat Cat 
+thatlessR = \ us xs -> 
+        [ (Branch (Cat "_" "COMP" [] []) [s], vs, ys) | 
+           gap       <- [Cat "#" "NP" [Comp] []], 
+           (s,vs,ys) <- push gap prsS us xs, 
+           notElem Wh (fs (t2c s))                       ]
+{--
 thatlessR :: SPARSER Cat Cat 
 thatlessR = \ us xs -> 
         [ (Branch (Cat "_" "COMP" [] []) [s], vs, ys) | 
            gap       <- [Cat "#" "NP" [AccOrDat] []], 
            (s,vs,ys) <- push gap prsS us xs, 
            notElem Wh (fs (t2c s))                       ]
+--}
 
 prsYN :: SPARSER Cat Cat 
 prsYN = \us xs -> 
@@ -825,6 +909,16 @@ transW (Branch (Cat _ "NP" fs _) [det,cn]) =
 transW (Leaf (Cat _ "NP" fs _)) 
       | Masc      `elem` fs = Rel "man"    [Var 0]
       | Fem       `elem` fs = Rel "woman"  [Var 0]
+      | otherwise           = Rel "thing"  [Var 0]
+
+transW (Branch (Cat _ "PP" fs _) [prep,np]) 
+      | Masc      `elem` fs = Rel "man"    [Var 0]
+      | Fem       `elem` fs = Rel "woman"  [Var 0]
+      | otherwise           = Rel "thing"  [Var 0]
+{--
+transW (Leaf (Cat _ "NP" fs _)) 
+      | Masc      `elem` fs = Rel "man"    [Var 0]
+      | Fem       `elem` fs = Rel "woman"  [Var 0]
       | MascOrFem `elem` fs = Rel "person" [Var 0]
       | otherwise           = Rel "thing"  [Var 0]
 
@@ -833,6 +927,7 @@ transW (Branch (Cat _ "PP" fs _) [prep,np])
       | Fem       `elem` fs = Rel "woman"  [Var 0]
       | MascOrFem `elem` fs = Rel "person" [Var 0]
       | otherwise           = Rel "thing"  [Var 0]
+--}
 
 subst :: Term -> Term -> Term 
 subst x (Const name)         = Const name

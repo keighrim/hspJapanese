@@ -18,7 +18,7 @@ data Feat =
     -- Case markers 
     -- | NO | De | Ni | Wo | Ga | Ha | Mo | Kara | Made | Madeni
     -- が nominative の genitive を accusative に locative, dative へ ablative と で instumental から ablative より comparative
-    | Nom | Gen | Acc | Dat | Loc | Abl | Comp | Voc | Ins
+    | Nom | Gen | Acc | Dat | Loc | Abl | Comp | Voc | Ins | Top
     -- Need just a few prepositional (postpositional) particle. Note that case marking and postpositionals are pretty similar..
     | Only | Until | On | With | By
         -- We don't want a full fledged parser, keep this simple
@@ -30,7 +30,7 @@ data Feat =
     -- か、の、や、な、わ、とも、かしら
     -- Interjectory particles (間投助詞 kantō-joshi?)
     -- さ、よ、ね
-    | Decl | Intrg | Intrj | Imper | Hypo | Caus | Pass | Neg
+    | Decl | Intrg | Intrj | Imper | Hypo | Caus | Pass | Nega -- Conflict Neg P.hs line 700
     -- honorifics 
     | Poli | Resp | Humb | Neutr | Unoff
     -- need features for regular (non-honorific) and unofficial
@@ -177,10 +177,10 @@ lexicon "few"     = [Cat "few"     "DET" [Pl]  []]
 lexicon "this"    = [Cat "this"    "DET" [Sg]  []]
 lexicon "these"   = [Cat "these"   "DET" [Pl]  []]
 lexicon "those"   = [Cat "those"   "DET" [Pl]  []]
---}
 
 lexicon "less_than" = [Cat "less_than" "DF" [Pl] []]
 lexicon "more_than" = [Cat "more_than" "DF" [Pl] []]
+--}
 
 
 -- Nouns are cheesy easy. Do we need a CN distinction? Should pronouns and names
@@ -279,12 +279,13 @@ lexicon "no"   = [Cat "no"   "CASE" [Gen] []] -- genetive
 lexicon "wa"   = [Cat "wa"   "CASE" [Top] []] -- topic
 lexicon "ni"   = [Cat "ni"   "CASE" [Dat] []] -- dative (to SOMEONE)
 lexicon "ni"   = [Cat "ni"   "CASE" [Loc] []] -- locative (at, in)
-lexicon "kara" = [Cat "kara" "CASE" [Abl] []]] -- ablative (to SOMEWHERE)
-lexicon "de"   = [Cat "de"   "CASE" [Ins] []]] -- instumental (with, by)
+lexicon "kara" = [Cat "kara" "CASE" [Abl] []] -- ablative (to SOMEWHERE)
+lexicon "de"   = [Cat "de"   "CASE" [Ins] []] -- instumental (with, by)
 lexicon "yori" = [Cat "yori" "CASE" [Comp] []] 
 lexicon "da"   = [Cat "da"   "CASE" [Decl] []] -- declarative 
 lexicon "desu" = [Cat "desu" "CASE" [Decl, Poli] []] 
 
+{--
 lexicon "no"    = [Cat "no"     "PREP" [NO] []]
 lexicon "de"    = [Cat "de"     "PREP" [De] []]
 lexicon "ni"    = [Cat "ni"     "PREP" [Ni] []]
@@ -295,13 +296,14 @@ lexicon "mo"    = [Cat "mo"     "PREP" [Mo] []]
 lexicon "kara"  = [Cat "kara"   "PREP" [Kara] []]
 lexicon "made"  = [Cat "made"   "PREP" [Made] []]
 lexicon "madeni" = [Cat "madeni" "PREP" [Madeni] []]
+--}
 
 -- KRIM: of course we need a separate tag like "POST" as you suggested
 -- not sure what kinds of features these should take
 lexicon "to"     = [Cat "to"     "CONJ" [] []]
-lexicon "e"      = [Cat "e"      "POST" [] []]]
+lexicon "e"      = [Cat "e"      "POST" [] []]
 lexicon "made"   = [Cat "made"   "POST" [] []]
-lexicon "madeni" = [Cat "madeni" "POST" []] []]
+lexicon "madeni" = [Cat "madeni" "POST" [] []]
 
 {--
 lexicon "on"   = [Cat "on"   "PREP" [On]   []]
@@ -360,7 +362,7 @@ lexicon "miru"     = [Cat "miru"     "VP"  [Idan, Neutr, Decl, Pres] []]
 lexicon "reru"    = [Cat "reru"     "FIN"  [Idan, Neutr, May] []] 
 lexicon "rareru"  = [Cat "rareru"   "FIN"  [Idan, Neutr, May] []] 
 lexicon "you"     = [Cat "you"      "FIN"  [Idan, Neutr, Imper] []] 
-lexicon "nai"     = [Cat "nai"      "END"  [Nai, Neg] []] 
+lexicon "nai"     = [Cat "nai"      "END"  [Nai, Nega] []] 
 lexicon "masu"    = [Cat "masu"     "FIN"  [Masu] []] 
 lexicon "te"      = [Cat "te"       "FIN"  [] []] 
 lexicon "reru"    = [Cat "reru"     "FIN"  [Nai, Godan, Pass] []] 
@@ -368,7 +370,7 @@ lexicon "seru"    = [Cat "seru"     "FIN"  [Nai, Godan, Caus] []]
 
 
 
-
+{--
 lexicon "shinimasu" = 
     [Cat "shinimasu" "VP" [Pres] [],
      Cat "shinimasu" "VP" [Pres] [Cat "_" "NP" [Anim] [],
@@ -403,7 +405,8 @@ lexicon "koroshite" =
                                 Cat "_" "PREP" [Wo] [],
                                 Cat "_" "NP" [Inanim] [],
                                 Cat "_" "PREP" [De] []]]
-
+--}
+                                
 
 {--
 lexicon "smiled"    = [Cat "smiled"    "VP" [Past] []]
