@@ -158,9 +158,6 @@ lexicon "kono"    = [Cat "kono"    "DET" []    []]
 lexicon "sono"    = [Cat "sono"    "DET" []    []]
 lexicon "ano"     = [Cat "ano"     "DET" []    []]
 
--- KRIM: what do you mean by these?
-lexicon "yori"    = [Cat "yori"    "DF"  []    []]
-lexicon "nohou"   = [Cat "nohou"   "DF"  []    []]
 
 {--
 lexicon "every"   = [Cat "every"   "DET" [Sg]  []]
@@ -246,6 +243,7 @@ lexicon "ta"     = [Cat "ta"     "FIN" [Te, Decl, Past] []]
 lexicon "ita"    = [Cat "ita"    "FIN" [Te, Decl, Past] []]
 -- then combining "i" + "mas" + "ita" makes VP [Anim, Poli, Decl, Past]
 
+{--
 lexicon "imasu"      = [Cat "imasu"      "AUX" [Pres] []]
 lexicon "imashita"   = [Cat "imashita"   "AUX" [Past] []]
 lexicon "itte"       = [Cat "itte"       "AUX" [Te]   []]
@@ -255,6 +253,7 @@ lexicon "atte"       = [Cat "atte"       "AUX" [Te]   []]
 lexicon "okimasu"    = [Cat "okimasu"    "AUX" [Pres] []]
 lexicon "okimashita" = [Cat "okimashita" "AUX" [Past] []]
 lexicon "oite"       = [Cat "oite"       "AUX" [Te]   []]
+--}
 
 {--
 lexicon "did"    = [Cat "did"    "AUX" [] []]
@@ -279,7 +278,8 @@ lexicon "no"   = [Cat "no"   "CASE" [Gen] []] -- genetive
 lexicon "wa"   = [Cat "wa"   "CASE" [Top] []] -- topic
 lexicon "ni"   = [Cat "ni"   "CASE" [Dat] []] -- dative (to SOMEONE)
 lexicon "ni"   = [Cat "ni"   "CASE" [Loc] []] -- locative (at, in)
-lexicon "kara" = [Cat "kara" "CASE" [Abl] []] -- ablative (to SOMEWHERE)
+lexicon "ni"   = [Cat "ni"   "CASE" [Abl] []] -- ablative (to SOMEWHERE)
+lexicon "kara" = [Cat "kara" "CASE" [Abl] []] -- ablative (from SOMEWHERE)
 lexicon "de"   = [Cat "de"   "CASE" [Ins] []] -- instumental (with, by)
 lexicon "yori" = [Cat "yori" "CASE" [Comp] []] 
 lexicon "da"   = [Cat "da"   "CASE" [Decl] []] -- declarative 
@@ -362,11 +362,11 @@ lexicon "miru"     = [Cat "miru"     "VP"  [Idan, Neutr, Decl, Pres] []]
 lexicon "reru"    = [Cat "reru"     "FIN"  [Idan, Neutr, May] []] 
 lexicon "rareru"  = [Cat "rareru"   "FIN"  [Idan, Neutr, May] []] 
 lexicon "you"     = [Cat "you"      "FIN"  [Idan, Neutr, Imper] []] 
-lexicon "nai"     = [Cat "nai"      "END"  [Nai, Nega] []] 
+lexicon "nai"     = [Cat "nai"      "END"  [Nai, Nega] []] -- Do we need Nai and Negative?
 lexicon "masu"    = [Cat "masu"     "FIN"  [Masu] []] 
-lexicon "te"      = [Cat "te"       "FIN"  [] []] 
-lexicon "reru"    = [Cat "reru"     "FIN"  [Nai, Godan, Pass] []] 
-lexicon "seru"    = [Cat "seru"     "FIN"  [Nai, Godan, Caus] []] 
+lexicon "te"      = [Cat "te"       "FIN"  [Te] []] 
+lexicon "reru"    = [Cat "reru"     "FIN"  [Nai, Godan, Pass] []] -- Nai?
+lexicon "seru"    = [Cat "seru"     "FIN"  [Nai, Godan, Caus] []] -- Nai?
 
 
 

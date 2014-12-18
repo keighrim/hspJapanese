@@ -374,6 +374,7 @@ assignT :: Feat ->  ParseTree Cat Cat
 assignT f (Leaf   c)    = [Leaf   c'    | c' <- assign f c]
 assignT f (Branch c ts) = [Branch c' ts | c' <- assign f c]
 
+{--
 sRule :: PARSER Cat Cat
 sRule = \ xs -> 
        [ (Branch (Cat "_" "S" [] []) [np',vp],zs) | 
@@ -382,10 +383,49 @@ sRule = \ xs ->
          np'     <- assignT Nom np,
          agreeC np vp,
          subcatList (t2c vp) == [] ]
+--}
+
+
+-- Consider original vpRule below 
+-- Consider parseNPsorPPs below
+-- use the "many" operator in some way to choose an arbitrary # of PartPs, PPs, or a VP
+sRule :: PARSER Cat Cat
+sRule = \ xs -> 
+       [ (Branch (Cat "_" "S" [] []) xps,zs) | 
+         (xps,zs) <- parsePartPsorPPsorVP xs ]
 
 parseSent :: PARSER Cat Cat
 parseSent = sRule 
 
+-- New particle phrase implementation, no agreement necessary
+partpRule :: PARSER Cat Cat 
+partpRule = \ xs -> 
+  [ (Branch (Cat "_" "PartP" fs []) [np,part],zs) | 
+    (np,ys) <- parseNP xs, 
+    (part,zs)  <- parsePartP  ys,
+    fs       <- combine (t2c np) (t2c part) ]
+
+parsePartP :: PARSER Cat Cat
+parsePartP = partpRule
+    
+-- This npRule can be deleted if we choose to ignore the 3 determiners we have
+-- And also ignore the possibility of relative clauses (which is probably fine)
+-- I am worried if recursion is okay here, if not then we would need to change 
+-- all our labels from NP to something else
+npRule :: PARSER Cat Cat 
+npRule = \ xs -> 
+  [ (Branch (Cat "_" "NP" fs []) [det,np],zs) | 
+    (det,ys) <- parseDET xs, 
+    (np,zs)  <- parseNP  ys,
+    fs       <- combine (t2c det) (t2c np) ]
+
+parseNP :: PARSER Cat Cat
+parseNP = leafP "NP" <|> npRule
+
+parseDET :: PARSER Cat Cat
+parseDET = leafP "DET"
+
+{--
 npRule :: PARSER Cat Cat 
 npRule = \ xs -> 
   [ (Branch (Cat "_" "NP" fs []) [det,cn],zs) | 
@@ -394,18 +434,6 @@ npRule = \ xs ->
     fs       <- combine (t2c det) (t2c cn),
     agreeC det cn ]
 
-parseNP :: PARSER Cat Cat
-parseNP = leafP "NP" <|> npRule
-
--- Need a new ppRule
-ppRule :: PARSER Cat Cat
-ppRule = \ xs -> 
-   [ (Branch (Cat "_" "PP" fs []) [prep,np'],zs) | 
-     (prep,ys) <- parsePrep xs, 
-     (np,zs)   <- parseNP ys,
-      np'      <- assignT Acc np, 
-      fs       <- combine (t2c prep) (t2c np') ]
-{--
 ppRule :: PARSER Cat Cat
 ppRule = \ xs -> 
    [ (Branch (Cat "_" "PP" fs []) [prep,np'],zs) | 
@@ -415,23 +443,46 @@ ppRule = \ xs ->
       fs       <- combine (t2c prep) (t2c np') ]
 --}
 
+
+-- A new PP rule for postpositions
+-- Our postpositions don't have features, so no need to assign them to NP like 
+-- old rule above
+ppRule :: PARSER Cat Cat
+ppRule = \ xs -> 
+   [ (Branch (Cat "_" "PP" fs []) [np,post],zs) | 
+     (np,ys)   <- parseNP xs, 
+     (post,zs) <- parsePost ys,
+      fs       <- combine (t2c np) (t2c post) ]
+
 parsePP :: PARSER Cat Cat
 parsePP = ppRule 
 
+parsePartPorPPorVP :: PARSER Cat Cat
+parsePartPorPPorVP = parsePartP <|> parsePP <|> parseVP
+
+parsePartPsorPPsorVP :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
+parsePartPsorPPsorVP = many parsePartPorPPorVP
+
+-- Compiler complains if we leave these out because of line 713
+-- Consider pruning that section later if we have time
 parseNPorPP :: PARSER Cat Cat
 parseNPorPP = parseNP <|> parsePP
 
 parseNPsorPPs :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
 parseNPsorPPs = many parseNPorPP
 
-parseDET :: PARSER Cat Cat
-parseDET = leafP "DET"
-
+-- No more CNs or Preps
+{--
 parseCN :: PARSER Cat Cat
 parseCN = leafP "CN"
 
 parsePrep :: PARSER Cat Cat
 parsePrep = leafP "PREP"
+--}
+
+-- Now we have Postpositions
+parsePost :: PARSER Cat Cat
+parsePost = leafP "POST"
 
 parseAux :: PARSER Cat Cat
 parseAux = leafP "AUX"
@@ -440,6 +491,8 @@ parseVP :: PARSER Cat Cat
 parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> auxVpRule
 --parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> finPerfVpRule <|> auxVpRule
 
+-- Here is where the real headaches begin - the VP
+-- No subcat frames, but all those glorious Auxen + endings
 vpRule :: PARSER Cat Cat
 vpRule = \xs -> 
  [ (Branch (Cat "_" "VP" (fs (t2c vp)) []) (vp:xps),zs) |  
@@ -448,6 +501,12 @@ vpRule = \xs ->
    (xps,zs)    <- parseNPsorPPs ys, 
    match subcatlist (map t2c xps) ]
 
+-- We do not need to match subcat lists, but we do need to check if Auxen are in
+-- the right order. We can give them numeric features, and if something in category
+-- 1 is before 2 or higher then it is no good. The only problem is determining
+-- if there is an order that always works. Since we can have Auxen which come after
+-- the main verb, and they would also need their own endings. So maybe we treat
+-- main verb and Auxen separately, and simply combine them if main Verb is in Te form?
 match :: [Cat] -> [Cat] -> Bool
 match []     []     = True
 match _      []     = False
@@ -497,6 +556,11 @@ prs string = let ws = lexer string
      in  [ s | catlist <- collectCats lexicon ws, 
             (s,[])  <- parseSent catlist ]
 
+----------------------------------------------------------------------------
+-- I am not sure we need anything below here, since prs uses parseSent which uses
+-- sRule. Below seems like ways to deal with ambiguous parse trees? I guess I will
+-- look at it more later.
+            
 type StackParser a b = [a] -> [a] -> [(b,[a],[a])]
 
 type SPARSER a b = StackParser a (ParseTree a b)
