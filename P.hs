@@ -402,11 +402,14 @@ partpRule :: PARSER Cat Cat
 partpRule = \ xs -> 
   [ (Branch (Cat "_" "PartP" fs []) [np,part],zs) | 
     (np,ys) <- parseNP xs, 
-    (part,zs)  <- parsePartP  ys,
+    (part,zs)  <- parsePart  ys,
     fs       <- combine (t2c np) (t2c part) ]
 
 parsePartP :: PARSER Cat Cat
 parsePartP = partpRule
+
+parsePart :: PARSER Cat Cat
+parsePart = leafP "CASE"
     
 -- This npRule can be deleted if we choose to ignore the 3 determiners we have
 -- And also ignore the possibility of relative clauses (which is probably fine)
