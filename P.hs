@@ -498,9 +498,15 @@ parseVP = vpRule
 -- No subcat frames, but all those glorious Auxen + endings
 vpRule :: PARSER Cat Cat
 vpRule = \xs -> 
- [ (Branch (Cat "_" "VP" (fs (t2c vp)) []) (vp:xps),zs) |  
+ [ (Branch (Cat "_" "VP" fs []) (vp:xps),zs) |  
    (vp,ys)  <- leafP "VP" xs, 
-   (xps,zs) <- parseFins ys]
+   (xps,zs) <- parseFins ys,
+   fs       <- superCombine vp xps,
+   and (map (\x -> agreeC vp x) xps)]
+   
+superCombine :: ParseTree Cat Cat -> [ParseTree Cat Cat] -> [Agreement]
+superCombine cat1 catlist =
+    concat (map (\x -> combine (t2c cat1) (t2c x)) catlist)
    
 finRule :: PARSER Cat Cat
 finRule = \ xs -> 
