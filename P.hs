@@ -491,7 +491,7 @@ parseAux :: PARSER Cat Cat
 parseAux = leafP "AUX"
 
 parseVP :: PARSER Cat Cat 
-parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> auxVpRule
+parseVP = vpRule
 --parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> finPerfVpRule <|> auxVpRule
 
 -- Here is where the real headaches begin - the VP
@@ -499,10 +499,25 @@ parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> auxVpRule
 vpRule :: PARSER Cat Cat
 vpRule = \xs -> 
  [ (Branch (Cat "_" "VP" (fs (t2c vp)) []) (vp:xps),zs) |  
-   (vp,ys)     <- leafP "VP" xs, 
-   subcatlist  <- [subcatList (t2c vp)],
-   (xps,zs)    <- parseNPsorPPs ys, 
-   match subcatlist (map t2c xps) ]
+   (vp,ys)  <- leafP "VP" xs, 
+   (xps,zs) <- parseFins ys]
+   
+finRule :: PARSER Cat Cat
+finRule = \ xs -> 
+   [ (Branch (Cat "_" "FIN" fs []) [end,fin],zs) | 
+     (end,ys) <- parseEnd xs, 
+     (fin,zs) <- parseFin ys,
+      fs      <- combine (t2c end) (t2c fin),
+      agreeC end fin]
+    
+parseEnd :: PARSER Cat Cat
+parseEnd = leafP "END" 
+
+parseFin :: PARSER Cat Cat
+parseFin = leafP "FIN" <|> finRule
+
+parseFins :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
+parseFins = many parseFin
 
 -- We do not need to match subcat lists, but we do need to check if Auxen are in
 -- the right order. We can give them numeric features, and if something in category
