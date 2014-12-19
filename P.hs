@@ -234,7 +234,7 @@ reaction =  parseManyAs "REACTION" answer
 turn     =  parseAs "TURN" [guess,reaction]
 game     =  turn <|> parseAs "GAME" [turn,game]
 
-gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy
+gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy, replaceType, replaceMood
      :: Agreement -> Agreement
 gender   = filter (`elem` [Masc,Fem])
 person   = filter (`elem` [Fst,Snd,Thrd])
@@ -431,16 +431,22 @@ parseSent = sRule
 -- KRIM: should takes multiple particles (cururu + sann + ni) 
 partpRule :: PARSER Cat Cat 
 partpRule = \ xs -> 
-  [ (Branch (Cat "_" "PartP" fs []) [np,part],zs) | 
-    (np,ys) <- parseNP xs, 
-    (part,zs)  <- parsePart  ys,
-    fs       <- combine (t2c np) (t2c part) ]
+  [ (Branch (Cat "_" "PartP" fs []) (np:part),zs) | 
+    (np,ys)   <- parseNP xs, 
+    (part,zs) <- parseParts  ys,
+    fs        <- superCombine np part ]
 
 parsePartP :: PARSER Cat Cat
 parsePartP = partpRule
 
 parsePart :: PARSER Cat Cat
 parsePart = leafP "CASE"
+
+parseNPorPart :: PARSER Cat Cat
+parseNPorPart = parseNP <|> parsePart
+
+parseParts :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
+parseParts = many parsePart
     
 -- This npRule can be deleted if we choose to ignore the 3 determiners we have
 -- And also ignore the possibility of relative clauses (which is probably fine)
@@ -542,7 +548,7 @@ superCombine cat1 catlist =
 finRule :: PARSER Cat Cat
 finRule = \ xs -> 
    [ (Branch (Cat "_" "FIN" fs []) [end,fin],zs) | 
-     (end,ys) <- parseEnd xs, 
+     (end,ys) <- parseEndorInf xs, 
      (fin,zs) <- parseFin ys,
       fs      <- combine (t2c end) (t2c fin),
       agreeC end fin]
@@ -552,6 +558,12 @@ parseEnd = leafP "END"
 
 parseFin :: PARSER Cat Cat
 parseFin = leafP "FIN" <|> finRule
+
+parseInf :: PARSER Cat Cat
+parseInf = leafP "INF"
+
+parseEndorInf :: PARSER Cat Cat
+parseEndorInf = parseEnd <|> parseInf
 
 parseFins :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
 parseFins = many parseFin
