@@ -532,7 +532,8 @@ vpRule :: PARSER Cat Cat
 vpRule = \xs -> 
  [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
    (vp,ys)  <- leafP "V" xs, 
-   (xps,zs) <- parseFins ys,
+   (xps,zs) <- parseEndorInfs ys,
+   --(xps,zs) <- parseFins ys,
    fs       <- superCombine vp xps,
    and (map (\x -> agreeC vp x) xps)]
    
@@ -562,6 +563,9 @@ parseEndorInf = parseEnd <|> parseInf
 
 parseFins :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
 parseFins = many parseFin
+
+parseEndorInfs :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
+parseEndorInfs = many parseEndorInf
 
 -- We do not need to match subcat lists, but we do need to check if Auxen are in
 -- the right order. We can give them numeric features, and if something in category
