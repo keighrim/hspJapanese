@@ -234,23 +234,42 @@ reaction =  parseManyAs "REACTION" answer
 turn     =  parseAs "TURN" [guess,reaction]
 game     =  turn <|> parseAs "GAME" [turn,game]
 
+genderFs   = [Masc,Fem]
+personFs   = [Fst,Snd,Thrd]
+gcaseFs    = [Nom,Gen,Acc,Dat,Loc,Abl,Comp,Voc,Ins,Top]
+pronTypeFs = [Pers,Refl,Wh]
+tenseFs    = [Past,Pres,Fut]
+modalFs    = [May,Must] 
+postTypeFs = [Only,Until,On,With,By]
+verbFormFs = [Te,Ta,Nai,Masu,Desu,Reru,You,Stem]
+verbTypeFs = [Dan5,Dan1,Irre,Iadj,Nadj]
+verbMoodFs = [Decl,Intrg,Intrj,Imper,Hypo,Caus,Pass,Nega]
+honorifFs  = [Poli,Resp,Humb,Neutr,Unoff]
+animacyFs  = [Anim,Inanim]
+repTypeFs  = [Tpiadj,Tpdan5,Tpdan1]
+repFormFs  = [Tpiadj,Tpdan5,Tpdan1]
+repMoodFs  = [Mddecl,Mdintrg]
+
 gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy
      :: Agreement -> Agreement
-gender   = filter (`elem` [Masc,Fem])
-person   = filter (`elem` [Fst,Snd,Thrd])
-gcase    = filter (`elem` [Nom,Gen,Acc,Dat,Loc,Abl,Comp,Voc,Ins,Top])
-pronType = filter (`elem` [Pers,Refl,Wh]) 
-tense    = filter (`elem` [Past,Pres,Fut]) 
-modal    = filter (`elem` [May,Must]) 
-postType = filter (`elem` [Only,Until,On,With,By]) 
-verbForm = filter (`elem` [Te,Ta,Nai,Masu,Desu,Reru,You])
-verbType = filter (`elem` [Dan5,Dan1,Irre,Iadj,Nadj])
-verbMood = filter (`elem` [Decl,Intrg,Intrj,Imper,Hypo,Caus,Pass,Nega]) 
-honorif  = filter (`elem` [Poli,Resp,Humb,Neutr,Unoff]) 
-animacy  = filter (`elem` [Anim,Inanim]) 
-replaceType = filter (`elem` [Tpiadj,Tpdan5,Tpdan1])
-replaceMood = filter (`elem` [Mddecl,Mdintrg])
-
+gender   = filter (`elem` genderFs)
+person   = filter (`elem` personFs)
+gcase    = filter (`elem` gcaseFs)
+pronType = filter (`elem` pronTypeFs)
+tense    = filter (`elem` tenseFs)
+modal    = filter (`elem` modalFs)
+postType = filter (`elem` postTypeFs)
+verbForm = filter (`elem` verbFormFs)
+verbType = filter (`elem` verbTypeFs)
+verbMood = filter (`elem` verbMoodFs)
+honorif  = filter (`elem` honorifFs)
+animacy  = filter (`elem` animacyFs)
+repType  = filter (`elem` repTypeFs)
+repForm  = filter (`elem` repFormFs)
+repMood  = filter (`elem` repMoodFs)
+notVerbType = filter (not . (`elem` verbTypeFs))
+notVerbForm = filter (not . (`elem` verbFormFs))
+notVerbMood = filter (not . (`elem` verbMoodFs))
 
 instance Show Cat where
   show (Cat "_"  label agr subcatlist) = label ++ show agr
@@ -275,58 +294,36 @@ transfrom s
   | s == Tpdan5 = Dan5
   | s == Tpdan1 = Dan1
   | s == Tpiadj = Iadj
+  | s == Tfstem = Stem
+  | s == Tfnai = Nai
+  | s == Tfte = Te
+  | s == Tfta = Ta
+  | s == Tfmasu = Masu
+  | s == Tfreru = Reru
+  | s == Tfyou = You
   | otherwise = Decl
 
+repFilter :: Cat -> Agreement -> Agreement -> Agreement
+repFilter cat filt feats
+  | filt == repFormFs && length (filter (`elem` filt) (fs cat)) >= 1
+      = filter (not . (`elem` verbFormFs)) feats
+  | filt == repTypeFs && length (filter (`elem` filt) (fs cat)) >= 1
+      = filter (not . (`elem` verbTypeFs)) feats
+  | filt == repMoodFs && length (filter (`elem` filt) (fs cat)) >= 1
+      = filter (not . (`elem` verbMoodFs)) feats
+  | otherwise = feats
 
 combine :: Cat -> Cat -> [Agreement]
 combine cat1 cat2 
-  | length (replaceType (fs cat2)) == 1 
-      = combineRepType cat1 cat2 (transfrom ((replaceType (fs cat2)) !! 0))
-  | length (replaceMood (fs cat2)) == 1 
-      = combineRepMood cat1 cat2 (transfrom ((replaceMood (fs cat2)) !! 0))
-  | otherwise
-      = combineNoRep cat1 cat2
+  | length (repType (fs cat2) ++ repForm (fs cat2) ++ repMood (fs cat2)) >= 1 
+      = rawCombine (repFilter cat2 verbTypeFs 
+                    (repFilter cat2 verbFormFs
+                     (repFilter cat2 verbMoodFs (fs cat1 ++ fs cat2))))
+  | otherwise 
+      = rawCombine (fs cat1 ++ fs cat2)
 
-combineRepType :: Cat -> Cat -> Feat -> [Agreement]
-combineRepType cat1 cat2 t =
-  [ feats | length (gender   feats) <= 1,  
-           length (person   feats) <= 1, 
-           length (gcase    feats) <= 1,
-           length (pronType feats) <= 1,
-           length (tense    feats) <= 1,
-           length (postType feats) <= 1,
-           length (verbMood feats) <= 1,
-           length (verbForm feats) == 0 || 
-           length (verbForm feats) == 2,
-           length (honorif  feats) <= 1,
-           length (animacy  feats) <= 1] ++ [[t]]
-  where 
-    feats = (nub . sort) (filter (not . (`elem` [Dan5,Dan1,Irre,Iadj,Nadj]))
-                            (fs cat1 ++ fs cat2))
-    --feats = (nub . sort) (fs (filter (not . verbType) (cat1 ++  cat2)))
-  
-combineRepMood :: Cat -> Cat -> Feat -> [Agreement]
-combineRepMood cat1 cat2 m =
-  [ feats | length (gender   feats) <= 1,  
-           length (person   feats) <= 1, 
-           length (gcase    feats) <= 1,
-           length (pronType feats) <= 1,
-           length (tense    feats) <= 1,
-           length (postType feats) <= 1,
-           length (verbType feats) <= 1,
-           length (verbForm feats) == 0 || 
-           length (verbForm feats) == 2,
-           length (honorif  feats) <= 1,
-           length (animacy  feats) <= 1] ++ [[m]]
-  where 
-    feats = (nub . sort) (filter (not . (`elem` [Decl,Intrg,Intrj,Imper,Hypo,Caus,Pass,Nega])) 
-                            (fs cat1 ++ fs cat2))
-    --feats = (nub . sort) (fs cat1 ++ fs cat2)
-  
-
-
-combineNoRep :: Cat -> Cat -> [Agreement]
-combineNoRep cat1 cat2 = 
+rawCombine :: Agreement -> [Agreement]
+rawCombine fss = 
  [ feats | length (gender   feats) <= 1,  
            length (person   feats) <= 1, 
            length (gcase    feats) <= 1,
@@ -334,14 +331,29 @@ combineNoRep cat1 cat2 =
            length (tense    feats) <= 1,
            length (postType feats) <= 1,
            length (verbType feats) <= 1,
-           length (verbForm feats) == 0 || 
-           length (verbForm feats) == 2,
+           length (verbForm feats) <= 1,
            length (verbMood feats) <= 1,
            length (honorif  feats) <= 1,
            length (animacy  feats) <= 1]
   where 
-    feats = (nub . sort) (fs cat1 ++ fs cat2)
-    -- Will deleting prune break everything? Let's see
+    feats = (nub . sort) fss
+
+combineNoRep :: Cat -> Cat -> [Agreement]
+combineNoRep cat1 cat2 = rawCombine (fs cat1 ++ fs cat2)
+ --[ feats | length (gender   feats) <= 1,  
+ --          length (person   feats) <= 1, 
+ --          length (gcase    feats) <= 1,
+ --          length (pronType feats) <= 1,
+ --          length (tense    feats) <= 1,
+ --          length (postType feats) <= 1,
+ --          length (verbType feats) <= 1,
+ --          length (verbForm feats) <= 1,
+ --          length (verbMood feats) <= 1,
+ --          length (honorif  feats) <= 1,
+ --          length (animacy  feats) <= 1]
+ -- where 
+ --   feats = (nub . sort) (fs cat1 ++ fs cat2)
+ --    Will deleting prune break everything? Let's see
     --feats = (prune . nub . sort) (fs cat1 ++ fs cat2)
 
 agree :: Cat -> Cat -> Bool

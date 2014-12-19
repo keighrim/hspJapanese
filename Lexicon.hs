@@ -41,7 +41,7 @@ data Feat =
     | Advb 
     -- But we need syntactic features
     | Dan5 | Dan1 | Irre | Iadj | Nadj         -- Verb types
-    | Te | Ta | Nai | Masu | Desu | Reru | You -- Ending types (morphological form)
+    | Stem | Te | Ta | Nai | Masu | Desu | Reru | You -- Ending types (morphological form)
     -- eg> verb [Te] only combines ending [Te]
 
     -- Parallel markers -- I've never seen such things
@@ -58,6 +58,7 @@ data Feat =
     -- Transformation features
     | Tpiadj | Tpdan5 | Tpdan1
     | Mddecl | Mdintrg
+    | Tfstem | Tfnai | Tfte | Tfta | Tfmasu | Tfreru | Tfyou
     -- TpXXX assigns type XXX to combined VP 
     -- similarly, MdXXX assigns mood XXX to combined VP 
 
@@ -148,14 +149,14 @@ lexicon "madeni" = [Cat "madeni" "POST" [] []]
 -- i(ru): there exists (anim)
 -- mi(ru): look
 -- tabe(ru): eat
-lexicon "shin"  = [Cat "shin"   "V"   [Dan5] []] -- keep lexicons of stem only
-lexicon "koros" = [Cat "koros"  "V"   [Dan5] []]
-lexicon "a" = [Cat "a"  "V"   [Dan5, Inanim] [],
+lexicon "shin"  = [Cat "shin"   "V"   [Dan5, Stem] []] -- keep lexicons of stem only
+lexicon "koros" = [Cat "koros"  "V"   [Dan5, Stem] []]
+lexicon "a" = [Cat "a"  "V"   [Dan5, Inanim, Stem] [],
                Cat "a"  "AUX"   [Dan5, Inanim] [],
                -- 'a' dan infection for Dan5
                Cat "a"     "INF"  [Nai, Dan5] []] 
 
-lexicon "i"    = [Cat "i"     "V"   [Dan1, Anim] [], 
+lexicon "i"    = [Cat "i"     "V"   [Dan1, Anim, Stem] [], 
                   Cat "i"     "V"   [Dan1, Nai, Anim] [], 
                   Cat "i"     "V"   [Dan1, Masu, Anim] [], 
                   Cat "i"     "V"   [Dan1, Te, Anim] [], 
@@ -163,7 +164,7 @@ lexicon "i"    = [Cat "i"     "V"   [Dan1, Anim] [],
                   Cat "i"     "V"   [Dan1, Reru, Anim] [], 
                   Cat "i"     "V"   [Dan1, You, Anim] [], 
                   -- aux 'iru'
-                  Cat "i"     "AUX"   [Dan1, Anim] [], 
+                  Cat "i"     "AUX"   [Dan1, Anim, Stem] [], 
                   Cat "i"     "AUX"   [Dan1, Nai, Anim] [], 
                   Cat "i"     "AUX"   [Dan1, Masu, Anim] [], 
                   Cat "i"     "AUX"   [Dan1, Te, Anim] [], 
@@ -177,14 +178,17 @@ lexicon "i"    = [Cat "i"     "V"   [Dan1, Anim] [],
                   Cat "i"     "INF"  [Te, Dan5] [],
                   Cat "i"     "INF"  [Ta, Dan5] [], 
                   Cat "i"     "INF"  [Desu, Iadj] []] 
-lexicon "mi"    = [Cat "mi"     "V"   [Dan1] [], 
-                   Cat "mi"     "V"   [Dan1, Nai] [], 
+--lexicon "mi"    = [Cat "mi"     "V"   [Dan1] [], 
+                   --Cat "mi"     "V"   [Dan1, Nai] [], 
+lexicon "mi"    = 
+                   [Cat "mi"     "V"   [Dan1, Nai] [], 
+                   Cat "mi"     "V"   [Dan1, Stem] [], 
                    Cat "mi"     "V"   [Dan1, Masu] [], 
                    Cat "mi"     "V"   [Dan1, Te] [], 
                    Cat "mi"     "V"   [Dan1, Ta] [], 
                    Cat "mi"     "V"   [Dan1, Reru] [], 
                    Cat "mi"     "V"   [Dan1, You] []]
-lexicon "tabe"    = [Cat "tabe"     "V"   [Dan1] [], 
+lexicon "tabe"    = [Cat "tabe"     "V"   [Dan1, Stem] [], 
                      Cat "tabe"     "V"   [Dan1, Nai] [], 
                      Cat "tabe"     "V"   [Dan1, Masu] [], 
                      Cat "tabe"     "V"   [Dan1, Te] [], 
@@ -192,11 +196,11 @@ lexicon "tabe"    = [Cat "tabe"     "V"   [Dan1] [],
                      Cat "tabe"     "V"   [Dan1, Reru] [], 
                      Cat "tabe"     "V"   [Dan1, You] []] 
 
-lexicon "taka"  = [Cat "taka"  "V"  [Iadj] []]
-lexicon "ama"  = [Cat "ama"  "V"  [Iadj] []]
+lexicon "taka"  = [Cat "taka"  "V"  [Iadj, Stem] []]
+lexicon "ama"  = [Cat "ama"  "V"  [Iadj, Stem] []]
 
-lexicon "kire"  = [Cat "kire"  "V"  [Nadj] []]
-lexicon "suki"  = [Cat "suki"  "V"  [Nadj] []]
+lexicon "kire"  = [Cat "kire"  "V"  [Nadj, Stem] []]
+lexicon "suki"  = [Cat "suki"  "V"  [Nadj, Stem] []]
 -- need to handle irregular 'kuru', 'suru' here - hardcoding is the best way
 
 -- then combining "i" + "mas" + "ita" makes VP [Anim, Poli, Decl, Past]
@@ -221,8 +225,9 @@ lexicon "dat"     = [Cat "dak"     "INF"  [Ta, Nadj] []]
 lexicon "ku"     = [Cat "ku"     "INF"  [Nai, Iadj] [], 
                     Cat "ku"     "INF"  [Te, Iadj] []] 
 lexicon "dewa"     = [Cat "dewa"     "INF"  [Nai, Nadj] []] 
-lexicon "re"     = [Cat "reru"     "INF"  [Reru, Dan1, May] []]
-lexicon "rare"     = [Cat "rareru"     "INF"  [Reru, Dan1, May] []]
+lexicon "re"     = [Cat "reru"    "INF"  [Reru, Dan1, May, Tfstem] [],
+                    Cat "rer"     "END"  [Nai, Pass, Tpdan1, Tfstem] []]  
+lexicon "rare"     = [Cat "rareru"     "INF"  [Reru, Dan1, May, Tfstem] []]
 -- need imperative 'e'[Dan5] and 'ro'[Dan1]
 
 -- endings
@@ -231,12 +236,13 @@ lexicon "rare"     = [Cat "rareru"     "INF"  [Reru, Dan1, May] []]
 -- reru: passive
 -- ba: conditional
 -- masu/desu: polite
-lexicon "na"     = [Cat "na"     "END"  [Nai, Nega, Tpiadj] []]  
-lexicon "ser"     = [Cat "ser"     "END"  [Nai, Caus] []]  
-lexicon "rer"     = [Cat "rer"     "END"  [Nai, Pass] []]  
+lexicon "na"     = [Cat "na"     "END"  [Nai, Nega, Tpiadj, Tfstem] []]  
+lexicon "se"     = [Cat "ser"     "END"  [Nai, Caus, Tpdan1, Tfstem] []]  
 
-lexicon "mas"    = [Cat "mas"    "END"  [Poli, Masu, Tpdan5] []]
-lexicon "des"    = [Cat "des"    "END"  [Poli, Desu, Tpdan5] []]
+lexicon "mas"    = [Cat "mas"    "END"  [Poli, Masu, Dan5, Tpdan5, Tfstem] [],
+                    Cat "mas"    "END"  [Poli, Masu, Dan1, Tpdan5, Tfstem] []]
+lexicon "des"    = [Cat "des"    "END"  [Poli, Desu, Iadj, Tfstem, Tpdan5] [], 
+                    Cat "des"    "END"  [Poli, Desu, Nadj, Tfstem, Tpdan5] []]
 lexicon "ba"     = [Cat "ba"     "END"  [Reru, Hypo] []]
 -- how to implement 'na' for Na-adj
 
@@ -245,15 +251,15 @@ lexicon "ba"     = [Cat "ba"     "END"  [Reru, Hypo] []]
 -- ta(N): past, neutral
 -- you: let's ...
 -- te(V): connecting verbs
-lexicon "u"  = [Cat "u"  "FIN"  [Pres, Neutr, Decl, Dan5] [], -- 'u' dan inf
+lexicon "u"  = [Cat "u"  "FIN"  [Stem, Pres, Neutr, Decl, Dan5, Tfstem] [], -- 'u' dan inf
                 Cat "u"     "FIN"  [You, Dan5, Volit] []]    -- let's 'u'
-lexicon "ru"    = [Cat "ru"    "FIN"  [Pres, Neutr, Decl, Dan1] []]
+                -- TODO: need a mark for COMPLETELY FINALIZED
+lexicon "ru"    = [Cat "ru"    "FIN"  [Stem, Pres, Neutr, Decl, Dan1, Tfstem, Tpdan5] []]
 lexicon "te"     = [Cat "te"     "FIN"  [Te, Dan5] [], 
                     Cat "te"     "FIN"  [Te, Dan1] [], 
                     Cat "te"     "FIN"  [Te, Iadj] []]
-lexicon "ta"     = [Cat "ta"     "FIN"  [Ta, Neutr, Pres, Dan5] [], 
-                    Cat "ta"     "FIN"  [Ta, Neutr, Pres, Dan1] [], 
-                    Cat "ta"     "FIN"  [Ta, Neutr, Pres, Iadj] []]
-
+lexicon "ta"     = [Cat "ta"     "FIN"  [Ta, Neutr, Past, Dan5] [], 
+                    Cat "ta"     "FIN"  [Ta, Neutr, Past, Dan1] [], 
+                    Cat "ta"     "FIN"  [Ta, Neutr, Past, Iadj] []]
 lexicon "you"     = [Cat "you"     "FIN"  [You, Dan1, Volit] []]
 lexicon "shyou"     = [Cat "shyou"     "FIN"  [You, Dan1, Volit, Poli] []]
