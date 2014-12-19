@@ -247,7 +247,7 @@ verbMoodFs = [Decl,Intrg,Intrj,Imper,Hypo,Caus,Pass,Nega]
 honorifFs  = [Poli,Resp,Humb,Neutr,Unoff]
 animacyFs  = [Anim,Inanim]
 repTypeFs  = [Tpiadj,Tpdan5,Tpdan1]
-repFormFs  = [Tpiadj,Tpdan5,Tpdan1]
+repFormFs  = [Tfstem, Tfnai, Tfte, Tfta, Tfmasu, Tfreru, Tfyou ]
 repMoodFs  = [Mddecl,Mdintrg]
 
 gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy, repType, repMood, repForm
@@ -312,12 +312,14 @@ repFilter cat filt feats
 
 combine :: Cat -> Cat -> [Agreement]
 combine cat1 cat2 
-  | length (repType (fs cat2) ++ repForm (fs cat2) ++ repMood (fs cat2)) >= 1 
-      = rawCombine (repFilter cat2 verbTypeFs 
-                    (repFilter cat2 verbFormFs
-                     (repFilter cat2 verbMoodFs (fs cat1 ++ fs cat2))))
+  | length replace >= 1 
+      = rawCombine ((repFilter cat2 repTypeFs 
+                     (repFilter cat2 repFormFs
+                      (repFilter cat2 repMoodFs (fs cat1 ++ fs cat2))))
+                    ++ map transfrom replace)
   | otherwise 
       = rawCombine (fs cat1 ++ fs cat2)
+ where replace = (repType (fs cat2) ++ repForm (fs cat2) ++ repMood (fs cat2))
 
 rawCombine :: Agreement -> [Agreement]
 rawCombine fss = 
@@ -335,23 +337,6 @@ rawCombine fss =
   where 
     feats = (nub . sort) fss
 
-combineNoRep :: Cat -> Cat -> [Agreement]
-combineNoRep cat1 cat2 = rawCombine (fs cat1 ++ fs cat2)
- --[ feats | length (gender   feats) <= 1,  
- --          length (person   feats) <= 1, 
- --          length (gcase    feats) <= 1,
- --          length (pronType feats) <= 1,
- --          length (tense    feats) <= 1,
- --          length (postType feats) <= 1,
- --          length (verbType feats) <= 1,
- --          length (verbForm feats) <= 1,
- --          length (verbMood feats) <= 1,
- --          length (honorif  feats) <= 1,
- --          length (animacy  feats) <= 1]
- -- where 
- --   feats = (nub . sort) (fs cat1 ++ fs cat2)
- --    Will deleting prune break everything? Let's see
-    --feats = (prune . nub . sort) (fs cat1 ++ fs cat2)
 
 agree :: Cat -> Cat -> Bool
 agree cat1 cat2 = not (null (combine cat1 cat2))

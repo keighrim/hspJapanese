@@ -117,6 +117,7 @@ lexicon "neko"      = [Cat "neko"       "N" [Anim]   []]
 lexicon "eki"       = [Cat "eki"        "N" [Inanim] []]
 lexicon "sensei"    = [Cat "sensei"     "N" [Anim]   []]
 lexicon "mono"      = [Cat "mono"       "N" []   []]
+lexicon "yama"      = [Cat "yama"       "N" []   []]
 
 -- Function words for nouns
 lexicon "sann"  = [Cat "sann"  "CASE" [Voc, Resp, Thrd] []] -- vocative
@@ -173,14 +174,12 @@ lexicon "i"    = [Cat "i"     "V"   [Dan1, Anim, Stem] [],
                   Cat "i"     "AUX"   [Dan1, Reru, Anim] [], 
                   Cat "i"     "AUX"   [Dan1, You, Anim] [], 
                   -- final for Iadj
-                  Cat "i"    "FIN"  [Neutr, Decl, Iadj] [], 
+                  Cat "i"    "FIN"  [Neutr, Decl, Iadj, Stem] [], 
                   -- 'i' dan inflections for Dan5
                   Cat "i"     "INF"  [Masu, Dan5] [], 
                   Cat "i"     "INF"  [Te, Dan5] [],
                   Cat "i"     "INF"  [Ta, Dan5] [], 
                   Cat "i"     "INF"  [Desu, Iadj] []] 
---lexicon "mi"    = [Cat "mi"     "V"   [Dan1] [], 
-                   --Cat "mi"     "V"   [Dan1, Nai] [], 
 lexicon "mi"    = 
                    [Cat "mi"     "V"   [Dan1, Nai] [], 
                    Cat "mi"     "V"   [Dan1, Stem] [], 
