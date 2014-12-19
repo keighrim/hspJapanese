@@ -300,23 +300,24 @@ transfrom s
   | s == Tfyou = You
   | otherwise = Decl
 
-repFilter :: Cat -> Agreement -> Agreement -> Agreement
+repFilter :: Cat -> Agreement -> [Agreement] -> [Agreement]
 repFilter cat filt feats
   | filt == repFormFs && length (filter (`elem` filt) (fs cat)) >= 1
-      = filter (not . (`elem` verbFormFs)) feats
+      = map (filter (not . (`elem` verbFormFs))) feats
   | filt == repTypeFs && length (filter (`elem` filt) (fs cat)) >= 1
-      = filter (not . (`elem` verbTypeFs)) feats
+      = map (filter (not . (`elem` verbTypeFs))) feats
   | filt == repMoodFs && length (filter (`elem` filt) (fs cat)) >= 1
-      = filter (not . (`elem` verbMoodFs)) feats
+      = map (filter (not . (`elem` verbMoodFs))) feats
   | otherwise = feats
 
 combine :: Cat -> Cat -> [Agreement]
 combine cat1 cat2 
   | length replace >= 1 
-      = rawCombine ((repFilter cat2 repTypeFs 
-                     (repFilter cat2 repFormFs
-                      (repFilter cat2 repMoodFs (fs cat1 ++ fs cat2))))
-                    ++ map transfrom replace)
+      = map (++ (map transfrom replace))
+        (repFilter cat2 repTypeFs 
+         (repFilter cat2 repFormFs
+          (repFilter cat2 repMoodFs 
+           (rawCombine (fs cat1 ++ fs cat2)) ) ) )
   | otherwise 
       = rawCombine (fs cat1 ++ fs cat2)
  where replace = (repType (fs cat2) ++ repForm (fs cat2) ++ repMood (fs cat2))
