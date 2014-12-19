@@ -205,27 +205,27 @@ lexicon "suki"  = [Cat "suki"  "N"  [Nadj, Stem] []]
 
 -- then combining "i" + "mas" + "ita" makes VP [Anim, Poli, Decl, Past]
 
-lexicon "e"     = [Cat "e"     "INF"  [Reru, Dan5, Tpdan1] []] -- 'e' dan inf
-lexicon "o"     = [Cat "o"     "INF"  [You, Dan5] []]          -- 'o' dan inf
+lexicon "e"     = [Cat "e"     "INF"  [Stem, Tfreru, Dan5, Tpdan1] []] -- 'e' dan inf
+lexicon "o"     = [Cat "o"     "INF"  [Stem, Tfyou, Dan5] []]          -- 'o' dan inf
 
 -- more inflections for Dan5
 -- need to dictinct Te form and Ta form because of I-adj
-lexicon "a" = [ Cat "a"     "INF"  [Nai, Dan5] []] 
-lexicon "t" = [Cat "t"     "INF"  [Te, Dan5] [], 
-                   Cat "t"     "INF"  [Ta, Dan5] []] 
-lexicon "k" = [Cat "k"     "INF"  [Te, Dan5] [], 
-                   Cat "k"     "INF"  [Ta, Dan5] []] 
-lexicon "p" = [Cat "p"     "INF"  [Te, Dan5] [], 
-                   Cat "p"     "INF"  [Ta, Dan5] []] 
-lexicon "nn"= [Cat "nn"     "INF"  [Te, Dan5] [], 
-                    Cat "nn"     "INF"  [Ta, Dan5] []] 
+lexicon "a" = [ Cat "a"     "INF"  [Stem, Tfnai, Dan5] []] 
+lexicon "t" = [Cat "t"     "INF"  [Stem, Tfte, Dan5] [], 
+                   Cat "t"     "INF"  [Stem, Tfta, Dan5] []] 
+lexicon "k" = [Cat "k"     "INF"  [Stem, Tfte, Dan5] [], 
+                   Cat "k"     "INF"  [Stem, Tfta, Dan5] []] 
+lexicon "p" = [Cat "p"     "INF"  [Stem, Tfte, Dan5] [], 
+                   Cat "p"     "INF"  [Stem, Tfta, Dan5] []] 
+lexicon "nn"= [Cat "nn"     "INF"  [Stem, Tfte, Dan5] [], 
+                    Cat "nn"     "INF"  [Stem, Tfta, Dan5] []] 
 
 -- more inflections for other than Dan5
-lexicon "kak" = [Cat "kak"     "INF"  [Ta, Iadj] []] 
-lexicon "dat" = [Cat "dak"     "INF"  [Ta, Nadj] []] 
-lexicon "ku"  = [Cat "ku"     "INF"  [Nai, Iadj] [], 
-                    Cat "ku"     "INF"  [Te, Iadj] []] 
-lexicon "dewa"= [Cat "dewa"     "INF"  [Nai, Nadj] []] 
+lexicon "kak" = [Cat "kak"     "INF"  [Stem, Tfta, Iadj] []] 
+lexicon "dat" = [Cat "dak"     "INF"  [Stem, Tfta, Nadj] []] 
+lexicon "ku"  = [Cat "ku"     "INF"  [Stem, Tfnai, Iadj] [], 
+                    Cat "ku"     "INF"  [Stem, Tfte, Iadj] []] 
+lexicon "dewa"= [Cat "dewa"     "INF"  [Stem, Tfnai, Nadj] []] 
 lexicon "re"  = [Cat "re"    "INF"  [Reru, Dan1, May, Tfstem] [],
                     Cat "re"     "END"  [Nai, Pass, Tpdan1, Tfstem] []]  
 lexicon "rare"= [Cat "rare"     "INF"  [Reru, Dan1, May, Tfstem] []]

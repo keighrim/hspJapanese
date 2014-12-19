@@ -468,7 +468,6 @@ npRule = \ xs ->
     (cn,zs)  <- parseCN  ys,
     fs       <- combine (t2c det) (t2c cn),
     agreeC det cn ]
-
 ppRule :: PARSER Cat Cat
 ppRule = \ xs -> 
    [ (Branch (Cat "_" "PP" fs []) [prep,np'],zs) | 
@@ -510,7 +509,6 @@ parseNPsorPPs = many parseNPorPP
 {--
 parseCN :: PARSER Cat Cat
 parseCN = leafP "CN"
-
 parsePrep :: PARSER Cat Cat
 parsePrep = leafP "PREP"
 --}
@@ -532,8 +530,7 @@ vpRule :: PARSER Cat Cat
 vpRule = \xs -> 
  [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
    (vp,ys)  <- leafP "V" xs, 
-   (xps,zs) <- parseEndorInfs ys,
-   --(xps,zs) <- parseFins ys,
+   (xps,zs) <- parseFins ys,
    fs       <- superCombine vp xps,
    and (map (\x -> agreeC vp x) xps)]
    --}
@@ -610,9 +607,6 @@ parseEndings = parseFin <|> parseEnd <|> parseInf
 
 --parseFins :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
 --parseFins = many parseEndings
-
-parseEndorInfs :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
-parseEndorInfs = many parseEndorInf
 
 -- We do not need to match subcat lists, but we do need to check if Auxen are in
 -- the right order. We can give them numeric features, and if something in category
@@ -1098,7 +1092,6 @@ transW (Leaf (Cat _ "NP" fs _))
       | Fem       `elem` fs = Rel "woman"  [Var 0]
       | MascOrFem `elem` fs = Rel "person" [Var 0]
       | otherwise           = Rel "thing"  [Var 0]
-
 transW (Branch (Cat _ "PP" fs _) [prep,np]) 
       | Masc      `elem` fs = Rel "man"    [Var 0]
       | Fem       `elem` fs = Rel "woman"  [Var 0]
@@ -1159,4 +1152,3 @@ process string = map transS (parses string)
 
 processW :: String -> [Abstract]
 processW string = map transWH (parses string)
-
