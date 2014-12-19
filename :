@@ -235,7 +235,7 @@ turn     =  parseAs "TURN" [guess,reaction]
 game     =  turn <|> parseAs "GAME" [turn,game]
 
 gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy
-     :: Agreement -> Agreement
+		 :: Agreement -> Agreement
 gender   = filter (`elem` [Masc,Fem])
 person   = filter (`elem` [Fst,Snd,Thrd])
 gcase    = filter (`elem` [Nom,Gen,Acc,Dat,Loc,Abl,Comp,Voc,Ins,Top])
@@ -243,8 +243,8 @@ pronType = filter (`elem` [Pers,Refl,Wh])
 tense    = filter (`elem` [Past,Pres,Fut]) 
 modal    = filter (`elem` [May,Must]) 
 postType = filter (`elem` [Only,Until,On,With,By]) 
-verbForm = filter (`elem` [Te,Ta,Nai,Masu,Desu,Reru,You])
 verbType = filter (`elem` [Dan5,Dan1,Irre,Iadj,Nadj])
+verbForm = filter (`elem` [Te,Ta,Nai,Masu,Desu,Reru,You])
 verbMood = filter (`elem` [Decl,Intrg,Intrj,Imper,Hypo,Caus,Pass,Nega]) 
 honorif  = filter (`elem` [Poli,Resp,Humb,Neutr,Unoff]) 
 animacy  = filter (`elem` [Anim,Inanim]) 
@@ -301,9 +301,7 @@ combineRepType cat1 cat2 t =
            length (honorif  feats) <= 1,
            length (animacy  feats) <= 1] ++ [[t]]
   where 
-    feats = (nub . sort) (filter (not . (`elem` [Dan5,Dan1,Irre,Iadj,Nadj]))
-                            (fs cat1 ++ fs cat2))
-    --feats = (nub . sort) (fs (filter (not . verbType) (cat1 ++  cat2)))
+    feats = (nub . sort) (fs (filter (not . verbType) (cat1 ++  cat2)))
   
 combineRepMood :: Cat -> Cat -> Feat -> [Agreement]
 combineRepMood cat1 cat2 m =
@@ -319,8 +317,7 @@ combineRepMood cat1 cat2 m =
            length (honorif  feats) <= 1,
            length (animacy  feats) <= 1] ++ [[m]]
   where 
-    feats = (nub . sort) (filter (not . (`elem` [Decl,Intrg,Intrj,Imper,Hypo,Caus,Pass,Nega])) 
-                            (fs cat1 ++ fs cat2))
+    feats = (nub . sort) (fs (filter (not . verbMood) (cat1 ++  cat2)))
     --feats = (nub . sort) (fs cat1 ++ fs cat2)
   
 
@@ -568,25 +565,25 @@ match _      []     = False
 match []      _     = False
 match (x:xs) (y:ys) = catLabel x == catLabel y 
             && agree x y 
-            && match xs ys 
+	          && match xs ys 
 
 finPastVpRule :: PARSER Cat Cat
 finPastVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs, 
-              vp'    <- assignT Past vp ]
+	      	    vp'    <- assignT Past vp ]
 
 finPresVpRule :: PARSER Cat Cat
 finPresVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs, 
-              vp'    <- assignT Pres vp ]
+	      	    vp'    <- assignT Pres vp ]
 
 finFutVpRule :: PARSER Cat Cat
 finFutVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs, 
-             vp'    <- assignT Fut vp ]
+	       	   vp'    <- assignT Fut vp ]
 
 -- No perfect
 {--
 finPerfVpRule :: PARSER Cat Cat
 finPerfVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs, 
-              vp'    <- assignT Perf vp ]
+	      	    vp'    <- assignT Perf vp ]
 --}
 
 
@@ -623,7 +620,7 @@ type SPARSER a b = StackParser a (ParseTree a b)
 infixr 4 <||>
 
 (<||>) :: StackParser a b -> StackParser a b 
-            -> StackParser a b 
+       	    -> StackParser a b 
 (p1 <||> p2) stack xs = p1 stack xs ++ p2 stack xs 
 
 infixl 6 <::>
