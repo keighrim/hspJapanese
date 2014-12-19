@@ -238,7 +238,7 @@ lexicon "rare"= [Cat "rare"     "INF"  [Reru, Dan1, May, Tfstem] []]
 -- ba: conditional
 -- masu/desu: polite
 lexicon "na"     = [Cat "na"     "END"  [Nai, Nega, Tpiadj, Tfstem] []]  
-lexicon "nai"     = [Cat "na"     "FIN"  [Nai, Nega, Tpiadj] []]  
+lexicon "nai"     = [Cat "nai"     "FIN"  [Nai, Nega, Tpiadj] []]  
 lexicon "se"     = [Cat "ser"     "END"  [Nai, Caus, Tpdan1, Tfstem] []]  
 
 lexicon "mas"    = [Cat "mas"    "END"  [Poli, Masu, Dan5, Tpdan5, Tfstem] [],

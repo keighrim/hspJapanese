@@ -455,7 +455,7 @@ npRule = \ xs ->
     fs       <- combine (t2c det) (t2c np) ]
 
 parseNP :: PARSER Cat Cat
-parseNP = leafP "N" <|> npRule
+parseNP = leafP "N"
 
 parseDET :: PARSER Cat Cat
 parseDET = leafP "DET"
@@ -523,7 +523,7 @@ parseAux :: PARSER Cat Cat
 parseAux = leafP "AUX"
 
 parseVP :: PARSER Cat Cat 
-parseVP = vpRule
+parseVP = finVpRule <|> infVpRule <|> endVpRule
 --parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> finPerfVpRule <|> auxVpRule
 
 -- Here is where the real headaches begin - the VP
@@ -535,33 +535,80 @@ vpRule = \xs ->
    (xps,zs) <- parseFins ys,
    fs       <- superCombine vp xps,
    and (map (\x -> agreeC vp x) xps)]
-   
+   --}
 superCombine :: ParseTree Cat Cat -> [ParseTree Cat Cat] -> [Agreement]
 superCombine cat1 catlist =
     concat (map (\x -> combine (t2c cat1) (t2c x)) catlist)
+    
+infVpRule :: PARSER Cat Cat
+infVpRule = \xs -> 
+ [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
+   (vp,ys)  <- leafP "V" xs, 
+   (xps,zs) <- parseInfs ys,
+   fs       <- superCombine vp xps,
+   and (map (\x -> agreeC vp x) xps)]
    
+parseInfVP :: PARSER Cat Cat
+parseInfVP = leafP "V" <|> infVpRule
+   
+endVpRule :: PARSER Cat Cat
+endVpRule = \xs -> 
+ [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
+   (vp,ys)  <- parseInfVP xs, 
+   (xps,zs) <- parseEnds ys,
+   fs       <- superCombine vp xps,
+   and (map (\x -> agreeC vp x) xps)]
+   
+parseInfEndVP :: PARSER Cat Cat
+parseInfEndVP = leafP "V" <|> endVpRule <|> infVpRule
+   
+finVpRule :: PARSER Cat Cat
+finVpRule = \xs -> 
+ [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
+   (vp,ys)  <- parseInfEndVP xs, 
+   (xps,zs) <- parseFins ys,
+   fs       <- superCombine vp xps,
+   and (map (\x -> agreeC vp x) xps)]
+
+
+   {--
 finRule :: PARSER Cat Cat
 finRule = \ xs -> 
-   [ (Branch (Cat "_" "FIN" fs []) [end,fin],zs) | 
-     (end,ys) <- parseEndorInf xs, 
+   [ (Branch (Cat "_" "FIN" fs []) (xps:fin),zs) | 
+     (xps,ys) <- parseEndsorInfs xs, 
      (fin,zs) <- parseFin ys,
-      fs      <- combine (t2c end) (t2c fin),
-      agreeC end fin]
-    
+     fs       <- superCombine fin xps,
+     and (map (\x -> agreeC fin x) xps)]
+    --}
 parseEnd :: PARSER Cat Cat
 parseEnd = leafP "END" 
 
+parseEnds:: [Cat] -> [([ParseTree Cat Cat],[Cat])]
+parseEnds = many parseEnd
+
 parseFin :: PARSER Cat Cat
-parseFin = leafP "FIN" <|> finRule
+parseFin = leafP "FIN"
+
+parseFins :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
+parseFins = many parseFin
 
 parseInf :: PARSER Cat Cat
 parseInf = leafP "INF"
 
+parseInfs:: [Cat] -> [([ParseTree Cat Cat],[Cat])]
+parseInfs = many parseInf
+
 parseEndorInf :: PARSER Cat Cat
 parseEndorInf = parseEnd <|> parseInf
 
-parseFins :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
-parseFins = many parseFin
+parseEndsorInfs :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
+parseEndsorInfs = many parseEndorInf
+
+parseEndings :: PARSER Cat Cat
+parseEndings = parseFin <|> parseEnd <|> parseInf
+
+--parseFins :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
+--parseFins = many parseEndings
 
 -- We do not need to match subcat lists, but we do need to check if Auxen are in
 -- the right order. We can give them numeric features, and if something in category
