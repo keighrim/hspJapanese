@@ -38,7 +38,7 @@ data Feat =
     -- ばかり、まで、だけ、ほど、くらい、など、なり、やら
     | Advb 
     -- But we need syntactic features
-    | Godan | Idan | Irre           -- Verb types
+    | 5dan | 1dan | Irre | Iadj | Nadj           -- Verb types
     | Te | Nai | Masu               -- Ending types (morphological form)
     -- verb [Te] only combines ending [Te]
 
@@ -79,11 +79,11 @@ lexicon "jibun" = [Cat "jibun" "NP" [Anim] []]
 -- Names just like normal nouns
 -- Should we treat honorifics separately? Sounds like a hassle
 -- KRIM: I guess we can take vocative cases separately and make them honorific using relavant features
-lexicon "rim"       = [Cat "rim"        "NP" [Anim] []]
-lexicon "curcuru"   = [Cat "curcuru"    "NP" [Anim] []]
-lexicon "arice"   = [Cat "arice"    "NP" [Anim] []]  -- alice
-lexicon "doroshi"   = [Cat "doroshi"    "NP" [Anim] []]  -- dorothy
-lexicon "sunouhowaito"   = [Cat "sunouhowaito"    "NP" [Anim] []]  -- snowwhite
+lexicon "rim"           = [Cat "rim"          "NP" [Anim] []]
+lexicon "curcuru"       = [Cat "curcuru"      "NP" [Anim] []]
+lexicon "arice"         = [Cat "arice"        "NP" [Anim] []]  -- alice
+lexicon "doroshi"       = [Cat "doroshi"      "NP" [Anim] []]  -- dorothy
+lexicon "sunouhowaito"  = [Cat "sunouhowaito" "NP" [Anim] []]  -- snowwhite
 
 -- Good old determiners. No features needed?
 -- KRIM: I don't think so. Should we keep DET tag? or just ADJ
@@ -150,50 +150,50 @@ lexicon "madeni" = [Cat "madeni" "POST" [] []]
 -- each verb has different forms:
 -- there are options to represent thses forms
 {--
-lexicon "shi"      = [Cat "shi"      "VP"  [Godan] []] 
-lexicon "shina"    = [Cat "shina"    "VP"  [Godan, Nai] []] 
-lexicon "shini"    = [Cat "shini"    "VP"  [Godan, Masu] []] 
-lexicon "shinu"    = [Cat "shinu"    "VP"  [Godan, Decl, Pres] []] 
-lexicon "shine"    = [Cat "shine"    "VP"  [Godan, Imper] []] 
-lexicon "shine"    = [Cat "shine"    "VP"  [Idan, May] []] 
-lexicon "shineru"  = [Cat "shineru"  "VP"  [Idan, Neutr, May, Decl] []] 
-lexicon "shinou"   = [Cat "shinou"   "VP"  [Godan, Neutr, Imper] []] 
-lexicon "shinn"    = [Cat "shinn"    "VP"  [Godan, Te] []] 
+lexicon "shi"      = [Cat "shi"      "VP"  [5dan] []] 
+lexicon "shina"    = [Cat "shina"    "VP"  [5dan, Nai] []] 
+lexicon "shini"    = [Cat "shini"    "VP"  [5dan, Masu] []] 
+lexicon "shinu"    = [Cat "shinu"    "VP"  [5dan, Decl, Pres] []] 
+lexicon "shine"    = [Cat "shine"    "VP"  [5dan, Imper] []] 
+lexicon "shine"    = [Cat "shine"    "VP"  [1dan, May] []] 
+lexicon "shineru"  = [Cat "shineru"  "VP"  [1dan, Neutr, May, Decl] []] 
+lexicon "shinou"   = [Cat "shinou"   "VP"  [5dan, Neutr, Imper] []] 
+lexicon "shinn"    = [Cat "shinn"    "VP"  [5dan, Te] []] 
 --}
 
 -- kami/shimo 1 dan - much easier
 -- 1 dan verbs rarely inflects
 {--
-lexicon "mi"       = [Cat "mi"       "VP"  [Idan, Nai] []] 
-lexicon "mi"       = [Cat "mi"       "VP"  [Idan, Masu] []] 
-lexicon "mi"       = [Cat "mi"       "VP"  [Idan, Te] []] 
-lexicon "miru"     = [Cat "miru"     "VP"  [Idan, Neutr, Decl, Pres] []] 
+lexicon "mi"       = [Cat "mi"       "VP"  [1dan, Nai] []] 
+lexicon "mi"       = [Cat "mi"       "VP"  [1dan, Masu] []] 
+lexicon "mi"       = [Cat "mi"       "VP"  [1dan, Te] []] 
+lexicon "miru"     = [Cat "miru"     "VP"  [1dan, Neutr, Decl, Pres] []] 
 --}
 
 -- or below is a more compositional way
-lexicon "shin"  = [Cat "shin"    "VP"   [Godan] []] -- keep lexicons of stem only
-lexicon "koros" = [Cat "koros"  "VP"   [Godan] []]
-lexicon "tabe"  = [Cat "tabe"   "VP"   [Godan] []]
-lexicon "mi"    = [Cat "mi"       "VP"  [Idan] []]
+lexicon "shin"  = [Cat "shin"    "VP"   [5dan] []] -- keep lexicons of stem only
+lexicon "koros" = [Cat "koros"  "VP"   [5dan] []]
+lexicon "tabe"  = [Cat "tabe"   "VP"   [5dan] []]
+lexicon "mi"    = [Cat "mi"       "VP"  [1dan] []]
 
 -- need to handle irregular 'kuru', 'suru' here
 
 -- endings
-lexicon "a"     = [Cat "a"       "END"  [Godan, Nai] [],
-                   Cat "a"      "AUX"  [Idan, Inanim] [],
-                   Cat "a"       "VP"   [Idan, Inanim] []]
-lexicon "i"     = [Cat "i"       "END"  [Godan, Masu] [],
-                   Cat "i"       "AUX"  [Idan, Anim] [],
-                   Cat "i"       "VP"   [Idan, Anim] []] -- stem
-lexicon "e"     = [Cat "e"       "FIN"  [Godan, Neutr, Imper] [],
-                   Cat "e"       "END"  [Godan, Idan, Neutr, May] []] -- ending 'e' transforms godan verbs into shimo 1 dan. how can we represent this?
+lexicon "a"     = [Cat "a"       "END"  [5dan, Nai] [],
+                   Cat "a"       "AUX"  [1dan, Inanim] [],
+                   Cat "a"       "VP"   [1dan, Inanim] []]
+lexicon "i"     = [Cat "i"       "END"  [5dan, Masu] [],
+                   Cat "i"       "AUX"  [1dan, Anim] [],
+                   Cat "i"       "VP"   [1dan, Anim] []] -- stem
+lexicon "e"     = [Cat "e"       "FIN"  [5dan, Neutr, Imper] [],
+                   Cat "e"       "END"  [5dan, 1dan, Neutr, May] []] -- ending 'e' transforms godan verbs into shimo 1 dan. how can we represent this?
 
-lexicon "ru"     = [Cat "ru"     "FIN"  [Idan, Neutr, May] [], --stem + "e" before this
+lexicon "ru"     = [Cat "ru"     "FIN"  [1dan, Neutr, May] [], --stem + "e" before this
                     Cat "ru"     "FIN"  [Decl, Pres] []] 
-lexicon "rareru" = [Cat "rareru" "FIN"  [Idan, Neutr, May] []] 
-lexicon "you"    = [Cat "you"    "FIN"  [Idan, Neutr, Imper] []] 
-lexicon "ou"     = [Cat "ou"     "FIN"  [Godan, Neutr, Imper] []] 
-lexicon "ouka"   = [Cat "ouka"   "FIN"  [Godan, Neutr, Imper] []] 
+lexicon "rareru" = [Cat "rareru" "FIN"  [1dan, Neutr, May] []] 
+lexicon "you"    = [Cat "you"    "FIN"  [1dan, Neutr, Imper] []] 
+lexicon "ou"     = [Cat "ou"     "FIN"  [5dan, Neutr, Imper] []] 
+lexicon "ouka"   = [Cat "ouka"   "FIN"  [5dan, Neutr, Imper] []] 
 lexicon "nai"    = [Cat "nai"    "END"  [Nai, Nega] []] 
 
 lexicon "masu"   = [Cat "masu"   "FIN"  [Masu] []] 
@@ -201,11 +201,11 @@ lexicon "mas"    = [Cat "mas"    "END"  [Poli] []]
 lexicon "masa"   = [Cat "mas"    "END"  [Nai, Poli] []]
 
 lexicon "te"     = [Cat "te"     "FIN"  [Te] []] 
-lexicon "reru"   = [Cat "reru"   "FIN"  [Nai, Godan, Pass] []] -- Nai
-lexicon "seru"   = [Cat "seru"   "FIN"  [Nai, Godan, Caus] []] -- Nai
+lexicon "reru"   = [Cat "reru"   "FIN"  [Nai, 5dan, Pass] []] -- Nai
+lexicon "seru"   = [Cat "seru"   "FIN"  [Nai, 5dan, Caus] []] -- Nai
 
-lexicon "aru"    = [Cat "aru"    "VP"   [Idan, Inanim, Neutr, Decl, Pres] [],
-                    Cat "aru"    "AUX"  [Idan, Inanim, Neutr, Decl, Pres] []]
+lexicon "aru"    = [Cat "aru"    "VP"   [1dan, Inanim, Neutr, Decl, Pres] [],
+                    Cat "aru"    "AUX"  [1dan, Inanim, Neutr, Decl, Pres] []]
 
 lexicon "u"      = [Cat "u"      "FIN"  [Decl, Pres] []] -- Finalizing ending
 
