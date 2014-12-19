@@ -234,7 +234,6 @@ reaction =  parseManyAs "REACTION" answer
 turn     =  parseAs "TURN" [guess,reaction]
 game     =  turn <|> parseAs "GAME" [turn,game]
 
-<<<<<<< HEAD
 genderFs   = [Masc,Fem]
 personFs   = [Fst,Snd,Thrd]
 gcaseFs    = [Nom,Gen,Acc,Dat,Loc,Abl,Comp,Voc,Ins,Top]
@@ -251,10 +250,7 @@ repTypeFs  = [Tpiadj,Tpdan5,Tpdan1]
 repFormFs  = [Tpiadj,Tpdan5,Tpdan1]
 repMoodFs  = [Mddecl,Mdintrg]
 
-gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy
-=======
-gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy, replaceType, replaceMood
->>>>>>> 9811d72e7054b178dfab6bdbb13d84f0f1bfd55e
+gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy, reType, repMood, repForm
      :: Agreement -> Agreement
 gender   = filter (`elem` genderFs)
 person   = filter (`elem` personFs)
@@ -271,9 +267,6 @@ animacy  = filter (`elem` animacyFs)
 repType  = filter (`elem` repTypeFs)
 repForm  = filter (`elem` repFormFs)
 repMood  = filter (`elem` repMoodFs)
-notVerbType = filter (not . (`elem` verbTypeFs))
-notVerbForm = filter (not . (`elem` verbFormFs))
-notVerbMood = filter (not . (`elem` verbMoodFs))
 
 instance Show Cat where
   show (Cat "_"  label agr subcatlist) = label ++ show agr
