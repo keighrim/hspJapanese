@@ -240,7 +240,8 @@ gender   = filter (`elem` [Masc,Fem])
 person   = filter (`elem` [Fst,Snd,Thrd])
 gcase    = filter (`elem` [Nom,Gen,Acc,Dat,Loc,Abl,Comp,Voc,Ins,Top])
 pronType = filter (`elem` [Pers,Refl,Wh]) 
-tense    = filter (`elem` [Past,Pres,Fut,May,Must]) 
+tense    = filter (`elem` [Past,Pres,Fut]) 
+modal    = filter (`elem` [May,Must]) 
 postType = filter (`elem` [Only,Until,On,With,By]) 
 verbType = filter (`elem` [Godan,Idan,Irre])
 verbEnd  = filter (`elem` [Te,Nai,Masu]) 
@@ -248,25 +249,6 @@ verbMood = filter (`elem` [Decl,Intrg,Intrj,Imper,Hypo,Caus,Pass,Nega])
 honorif  = filter (`elem` [Poli,Resp,Humb,Neutr,Unoff]) 
 animacy  = filter (`elem` [Anim,Inanim]) 
 
-{--
-gender, number, person, gcase, pronType, tense, prepType 
-		 :: Agreement -> Agreement
-gender   = filter (`elem` [MascOrFem,Masc,Fem,Neutr])
-number   = filter (`elem` [Sg,Pl])
-person   = filter (`elem` [Fst,Snd,Thrd])
-gcase    = filter (`elem` [Nom,AccOrDat])
-pronType = filter (`elem` [Pers,Refl,Wh]) 
-tense    = filter (`elem` [Past,Pres,Fut,Perf,Infl]) 
-prepType = filter (`elem` [On,With,By,To,From]) 
---}
-
--- If we don't want to keep MascOrFem, we get rid of this
-{--
-prune :: Agreement -> Agreement
-prune fs = if   (Masc `elem` fs || Fem `elem` fs)
-           then (delete MascOrFem fs) 
-           else fs 
---}
 
 instance Show Cat where
   show (Cat "_"  label agr subcatlist) = label ++ show agr
@@ -327,6 +309,7 @@ preproc ["."]              = []
 preproc ["?"]              = []
 preproc (",":xs)           = preproc xs
 
+{-- }
 preproc ("did":"not":xs)   = "didn't" : preproc xs
 preproc ("nothing":xs)     = "no"    : "thing"  : preproc xs
 preproc ("nobody":xs)      = "no"    : "person" : preproc xs
@@ -339,6 +322,7 @@ preproc ("more":"than":xs) = "more_than" : preproc xs
 preproc ("at":"least":xs)  = "at_least"  : preproc xs
 preproc ("at":"most":xs)   = "at_most"   : preproc xs
 preproc (x:xs)             = x : preproc xs
+--}
 
 lookupWord :: (String -> [Cat]) -> String -> [Cat]
 lookupWord db w = [ c | c <- db w ]
