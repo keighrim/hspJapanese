@@ -250,7 +250,7 @@ repTypeFs  = [Tpiadj,Tpdan5,Tpdan1]
 repFormFs  = [Tpiadj,Tpdan5,Tpdan1]
 repMoodFs  = [Mddecl,Mdintrg]
 
-gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy, reType, repMood, repForm
+gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy, repType, repMood, repForm
      :: Agreement -> Agreement
 gender   = filter (`elem` genderFs)
 person   = filter (`elem` personFs)

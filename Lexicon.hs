@@ -81,6 +81,9 @@ lexicon "kanojo"    = [Cat "kanojo"     "N" [Anim, Thrd, Fem]  []]
 lexicon "kore"      = [Cat "kore"       "N" [Inanim]    []]
 lexicon "sore"      = [Cat "sore"       "N" [Inanim]    []]
 lexicon "are"       = [Cat "are"        "N" [Inanim]    []]
+lexicon "koko"      = [Cat "koko"       "N" [Inanim]    []]
+lexicon "soko"      = [Cat "soko"       "N" [Inanim]    []]
+lexicon "asoko"     = [Cat "asoko"      "N" [Inanim]    []]
 -- Japanese doesn't really have reflexives
 lexicon "jibun" = [Cat "jibun" "N" [Anim] []]
 
@@ -151,10 +154,8 @@ lexicon "madeni" = [Cat "madeni" "POST" [] []]
 -- tabe(ru): eat
 lexicon "shin"  = [Cat "shin"   "V"   [Dan5, Stem] []] -- keep lexicons of stem only
 lexicon "koros" = [Cat "koros"  "V"   [Dan5, Stem] []]
-lexicon "a" = [Cat "a"  "V"   [Dan5, Inanim, Stem] [],
-               Cat "a"  "AUX"   [Dan5, Inanim] [],
-               -- 'a' dan infection for Dan5
-               Cat "a"     "INF"  [Nai, Dan5] []] 
+lexicon "ar" = [Cat "ar"  "V"   [Dan5, Inanim, Stem] [],
+                Cat "ar"  "AUX"   [Dan5, Inanim] []]
 
 lexicon "i"    = [Cat "i"     "V"   [Dan1, Anim, Stem] [], 
                   Cat "i"     "V"   [Dan1, Nai, Anim] [], 
@@ -210,24 +211,25 @@ lexicon "o"     = [Cat "o"     "INF"  [You, Dan5] []]          -- 'o' dan inf
 
 -- more inflections for Dan5
 -- need to dictinct Te form and Ta form because of I-adj
-lexicon "t"     = [Cat "t"     "INF"  [Te, Dan5] [], 
+lexicon "a" = [ Cat "a"     "INF"  [Nai, Dan5] []] 
+lexicon "t" = [Cat "t"     "INF"  [Te, Dan5] [], 
                    Cat "t"     "INF"  [Ta, Dan5] []] 
-lexicon "k"     = [Cat "k"     "INF"  [Te, Dan5] [], 
+lexicon "k" = [Cat "k"     "INF"  [Te, Dan5] [], 
                    Cat "k"     "INF"  [Ta, Dan5] []] 
-lexicon "p"     = [Cat "p"     "INF"  [Te, Dan5] [], 
+lexicon "p" = [Cat "p"     "INF"  [Te, Dan5] [], 
                    Cat "p"     "INF"  [Ta, Dan5] []] 
-lexicon "nn"     = [Cat "nn"     "INF"  [Te, Dan5] [], 
+lexicon "nn"= [Cat "nn"     "INF"  [Te, Dan5] [], 
                     Cat "nn"     "INF"  [Ta, Dan5] []] 
 
 -- more inflections for other than Dan5
-lexicon "kak"     = [Cat "kak"     "INF"  [Ta, Iadj] []] 
-lexicon "dat"     = [Cat "dak"     "INF"  [Ta, Nadj] []] 
-lexicon "ku"     = [Cat "ku"     "INF"  [Nai, Iadj] [], 
+lexicon "kak" = [Cat "kak"     "INF"  [Ta, Iadj] []] 
+lexicon "dat" = [Cat "dak"     "INF"  [Ta, Nadj] []] 
+lexicon "ku"  = [Cat "ku"     "INF"  [Nai, Iadj] [], 
                     Cat "ku"     "INF"  [Te, Iadj] []] 
-lexicon "dewa"     = [Cat "dewa"     "INF"  [Nai, Nadj] []] 
-lexicon "re"     = [Cat "reru"    "INF"  [Reru, Dan1, May, Tfstem] [],
+lexicon "dewa"= [Cat "dewa"     "INF"  [Nai, Nadj] []] 
+lexicon "re"  = [Cat "reru"    "INF"  [Reru, Dan1, May, Tfstem] [],
                     Cat "rer"     "END"  [Nai, Pass, Tpdan1, Tfstem] []]  
-lexicon "rare"     = [Cat "rareru"     "INF"  [Reru, Dan1, May, Tfstem] []]
+lexicon "rare"= [Cat "rareru"     "INF"  [Reru, Dan1, May, Tfstem] []]
 -- need imperative 'e'[Dan5] and 'ro'[Dan1]
 
 -- endings
