@@ -400,21 +400,7 @@ assignT :: Feat ->  ParseTree Cat Cat
 assignT f (Leaf   c)    = [Leaf   c'    | c' <- assign f c]
 assignT f (Branch c ts) = [Branch c' ts | c' <- assign f c]
 
-{--
-sRule :: PARSER Cat Cat
-sRule = \ xs -> 
-       [ (Branch (Cat "_" "S" [] []) [np',vp],zs) | 
-         (np,ys) <- parseNP xs,
-         (vp,zs) <- parseVP ys, 
-         np'     <- assignT Nom np,
-         agreeC np vp,
-         subcatList (t2c vp) == [] ]
---}
-
-
--- Consider original vpRule below 
--- Consider parseNPsorPPs below
--- use the "many" operator in some way to choose an arbitrary # of PartPs, PPs, or a VP
+-- new sRule implementation
 sRule :: PARSER Cat Cat
 sRule = \ xs -> 
        [ (Branch (Cat "_" "S" [] []) xps,zs) | 
@@ -424,7 +410,6 @@ parseSent :: PARSER Cat Cat
 parseSent = sRule 
 
 -- New particle phrase implementation, no agreement necessary
--- KRIM: should takes multiple particles (cururu + sann + ni) 
 partpRule :: PARSER Cat Cat 
 partpRule = \ xs -> 
   [ (Branch (Cat "_" "PartP" fs []) (np:part),zs) | 
@@ -444,10 +429,7 @@ parseNPorPart = parseNP <|> parsePart
 parseParts :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
 parseParts = many parsePart
     
--- This npRule can be deleted if we choose to ignore the 3 determiners we have
--- And also ignore the possibility of relative clauses (which is probably fine)
--- I am worried if recursion is okay here, if not then we would need to change 
--- all our labels from NP to something else
+-- npRule hasn't changed much, but now no feature agreement
 npRule :: PARSER Cat Cat 
 npRule = \ xs -> 
   [ (Branch (Cat "_" "N" fs []) [det,np],zs) | 
@@ -461,27 +443,7 @@ parseNP = leafP "N"
 parseDET :: PARSER Cat Cat
 parseDET = leafP "DET"
 
-{--
-npRule :: PARSER Cat Cat 
-npRule = \ xs -> 
-  [ (Branch (Cat "_" "NP" fs []) [det,cn],zs) | 
-    (det,ys) <- parseDET xs, 
-    (cn,zs)  <- parseCN  ys,
-    fs       <- combine (t2c det) (t2c cn),
-    agreeC det cn ]
-ppRule :: PARSER Cat Cat
-ppRule = \ xs -> 
-   [ (Branch (Cat "_" "PP" fs []) [prep,np'],zs) | 
-     (prep,ys) <- parsePrep xs, 
-     (np,zs)   <- parseNP ys,
-      np'      <- assignT AccOrDat np, 
-      fs       <- combine (t2c prep) (t2c np') ]
---}
-
-
 -- A new PP rule for postpositions
--- Our postpositions don't have features, so no need to assign them to NP like 
--- old rule above
 ppRule :: PARSER Cat Cat
 ppRule = \ xs -> 
    [ (Branch (Cat "_" "PP" fs []) [np,post],zs) | 
@@ -499,20 +461,11 @@ parsePartPsorPPsorVP :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
 parsePartPsorPPsorVP = many parsePartPorPPorVP
 
 -- Compiler complains if we leave these out because of line 713
--- Consider pruning that section later if we have time
 parseNPorPP :: PARSER Cat Cat
 parseNPorPP = parseNP <|> parsePP
 
 parseNPsorPPs :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
 parseNPsorPPs = many parseNPorPP
-
--- No more CNs or Preps
-{--
-parseCN :: PARSER Cat Cat
-parseCN = leafP "CN"
-parsePrep :: PARSER Cat Cat
-parsePrep = leafP "PREP"
---}
 
 -- Now we have Postpositions
 parsePost :: PARSER Cat Cat
@@ -522,53 +475,23 @@ parseAux :: PARSER Cat Cat
 parseAux = leafP "AUX"
 
 parseVP :: PARSER Cat Cat 
-parseVP = finVpRule -- <|> infVpRule <|> endVpRule
---parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> finPerfVpRule <|> auxVpRule
+parseVP = finVpRule 
 
 -- Here is where the real headaches begin - the VP
--- No subcat frames, but all those glorious Auxen + endings
+-- No subcat frames, but all those glorious endings
 vpRule :: PARSER Cat Cat
 vpRule = \xs -> 
  [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
    (vp,ys)  <- leafP "V" xs, 
    (xps,zs) <- parseFins ys,
    fs       <- superCombine vp xps,
-   and (map (\x -> agreeC vp x) xps)]
-   --}
+   and (map (\x -> agreeC vp x) xps)]   -- Old VP rule, kept for conflicts
+
 superCombine :: ParseTree Cat Cat -> [ParseTree Cat Cat] -> [Agreement]
 superCombine cat1 catlist =
     concat (map (\x -> combine (t2c cat1) (t2c x)) catlist)
-    {--
-infVpRule :: PARSER Cat Cat
-infVpRule = \xs -> 
- [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
-   (vp,ys)  <- leafP "V" xs, 
-   (xps,zs) <- parseInfs ys,
-   fs       <- superCombine vp xps,
-   and (map (\x -> agreeC vp x) xps)]
-   --}
-parseInfVP :: PARSER Cat Cat
-parseInfVP = leafP "V" <|> infVpRule
-   {--
-endVpRule :: PARSER Cat Cat
-endVpRule = \xs -> 
- [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
-   (vp,ys)  <- parseInfVP xs, 
-   (xps,zs) <- parseEnds ys,
-   fs       <- superCombine vp xps,
-   and (map (\x -> agreeC vp x) xps)]
-   --}
-parseInfEndVP :: PARSER Cat Cat
-parseInfEndVP = leafP "V" <|> endVpRule <|> infVpRule
-   {--
-finVpRule :: PARSER Cat Cat
-finVpRule = \xs -> 
- [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
-   (vp,ys)  <- parseInfEndVP xs, 
-   (xps,zs) <- parseFins ys,
-   fs       <- superCombine vp xps,
-   and (map (\x -> agreeC vp x) xps)]
---}
+    
+-- New VP rules
 infVpRule :: PARSER Cat Cat
 infVpRule = \ xs -> 
    [ (Branch (Cat "_" "V" fs []) [vp,inf],zs) | 
@@ -576,6 +499,9 @@ infVpRule = \ xs ->
      (inf,zs) <- parseInf ys,
       fs      <- combine (t2c vp) (t2c inf),
       agreeC vp inf ]
+    
+parseInfVP :: PARSER Cat Cat
+parseInfVP = leafP "V" <|> infVpRule
       
 endVpRule :: PARSER Cat Cat
 endVpRule = \ xs -> 
@@ -584,6 +510,9 @@ endVpRule = \ xs ->
      (end,zs) <- parseEnd ys,
       fs      <- combine (t2c vp) (t2c end),
       agreeC vp end ]
+      
+parseInfEndVP :: PARSER Cat Cat
+parseInfEndVP = leafP "V" <|> endVpRule <|> infVpRule
 
 finVpRule :: PARSER Cat Cat
 finVpRule = \ xs -> 
@@ -593,20 +522,8 @@ finVpRule = \ xs ->
       fs      <- combine (t2c vp) (t2c fin),
       agreeC vp fin ]
 
-   {--
-finRule :: PARSER Cat Cat
-finRule = \ xs -> 
-   [ (Branch (Cat "_" "FIN" fs []) (xps:fin),zs) | 
-     (xps,ys) <- parseEndsorInfs xs, 
-     (fin,zs) <- parseFin ys,
-     fs       <- superCombine fin xps,
-     and (map (\x -> agreeC fin x) xps)]
-    --}
 parseEnd :: PARSER Cat Cat
 parseEnd = leafP "END" 
-
-parseEnds:: [Cat] -> [([ParseTree Cat Cat],[Cat])]
-parseEnds = many parseEnd
 
 parseFin :: PARSER Cat Cat
 parseFin = leafP "FIN"
@@ -617,27 +534,39 @@ parseFins = many parseFin
 parseInf :: PARSER Cat Cat
 parseInf = leafP "INF"
 
+{-- Alternative VP rules implementation
+
+infVpRule :: PARSER Cat Cat
+infVpRule = \xs -> 
+ [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
+   (vp,ys)  <- leafP "V" xs, 
+   (xps,zs) <- parseInfs ys,
+   fs       <- superCombine vp xps,
+   and (map (\x -> agreeC vp x) xps)]
+
+endVpRule :: PARSER Cat Cat
+endVpRule = \xs -> 
+ [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
+   (vp,ys)  <- parseInfVP xs, 
+   (xps,zs) <- parseEnds ys,
+   fs       <- superCombine vp xps,
+   and (map (\x -> agreeC vp x) xps)]
+
+finVpRule :: PARSER Cat Cat
+finVpRule = \xs -> 
+ [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
+   (vp,ys)  <- parseInfEndVP xs, 
+   (xps,zs) <- parseFins ys,
+   fs       <- superCombine vp xps,
+   and (map (\x -> agreeC vp x) xps)]
+   
+parseEnds:: [Cat] -> [([ParseTree Cat Cat],[Cat])]
+parseEnds = many parseEnd
+
 parseInfs:: [Cat] -> [([ParseTree Cat Cat],[Cat])]
 parseInfs = many parseInf
+--}
 
-parseEndorInf :: PARSER Cat Cat
-parseEndorInf = parseEnd <|> parseInf
-
-parseEndsorInfs :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
-parseEndsorInfs = many parseEndorInf
-
-parseEndings :: PARSER Cat Cat
-parseEndings = parseFin <|> parseEnd <|> parseInf
-
---parseFins :: [Cat] -> [([ParseTree Cat Cat],[Cat])]
---parseFins = many parseEndings
-
--- We do not need to match subcat lists, but we do need to check if Auxen are in
--- the right order. We can give them numeric features, and if something in category
--- 1 is before 2 or higher then it is no good. The only problem is determining
--- if there is an order that always works. Since we can have Auxen which come after
--- the main verb, and they would also need their own endings. So maybe we treat
--- main verb and Auxen separately, and simply combine them if main Verb is in Te form?
 match :: [Cat] -> [Cat] -> Bool
 match []     []     = True
 match _      []     = False
@@ -658,29 +587,13 @@ finFutVpRule :: PARSER Cat Cat
 finFutVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs, 
              vp'    <- assignT Fut vp ]
 
--- No perfect
-{--
-finPerfVpRule :: PARSER Cat Cat
-finPerfVpRule = \xs -> [(vp',ys) | (vp,ys) <- vpRule xs, 
-              vp'    <- assignT Perf vp ]
---}
-
-
--- Need new auxVpRule - a nightmare?
+-- Need new auxVpRule - not yet implemented
 auxVpRule :: PARSER Cat Cat
 auxVpRule = \xs -> 
  [(Branch (Cat "_" "VP" (fs (t2c aux)) []) [aux,inf'],zs) | 
   (aux,ys) <- parseAux xs,
   (inf,zs) <- vpRule ys, 
   inf'    <- assignT Must inf ] 
-{--
-auxVpRule :: PARSER Cat Cat
-auxVpRule = \xs -> 
- [(Branch (Cat "_" "VP" (fs (t2c aux)) []) [aux,inf'],zs) | 
-  (aux,ys) <- parseAux xs,
-  (inf,zs) <- vpRule ys, 
-  inf'    <- assignT Infl inf ]  
---}
 
 prs :: String -> [ParseTree Cat Cat]
 prs string = let ws = lexer string 
@@ -689,9 +602,8 @@ prs string = let ws = lexer string
 
 ----------------------------------------------------------------------------
 -- I am not sure we need anything below here, since prs uses parseSent which uses
--- sRule. Below seems like ways to deal with ambiguous parse trees? I guess I will
--- look at it more later.
-            
+-- sRule. 
+
 type StackParser a b = [a] -> [a] -> [(b,[a],[a])]
 
 type SPARSER a b = StackParser a (ParseTree a b)
@@ -783,7 +695,6 @@ prsCN = leafPS "CN" <||> cnrelR
 
 prsVP :: SPARSER Cat Cat
 prsVP = finPastVpR <||> finPresVpR <||> finFutVpR <||> auxVpR
---prsVP = finPastVpR <||> finPresVpR <||> finFutVpR <||> finPerfVpR <||> auxVpR
 
 vpR :: SPARSER Cat Cat
 vpR = \us xs -> 
@@ -805,13 +716,6 @@ finFutVpR :: SPARSER Cat Cat
 finFutVpR = \us xs -> [(vp',vs,ys) | (vp,vs,ys) <- vpR us xs,
                                    vp' <- assignT Fut vp ]
 
--- Japanese is already perfect
-{--
-finPerfVpR :: SPARSER Cat Cat
-finPerfVpR = \us xs -> [(vp',vs,ys) | (vp,vs,ys) <- vpR us xs,
-                                   vp' <- assignT Perf vp ]
---}
-
 -- More Auxen handling
 auxVpR :: SPARSER Cat Cat
 auxVpR = \us xs -> 
@@ -820,15 +724,6 @@ auxVpR = \us xs ->
                  (aux,vs,ys) <- prsAUX us xs,
                  (inf,ws,zs) <- vpR vs ys,
                   inf'       <- assignT Must inf ] 
-{--
-auxVpR :: SPARSER Cat Cat
-auxVpR = \us xs -> 
-     [ (Branch (Cat "_" "VP" (fs (t2c aux)) []) 
-               [aux,inf'], ws, zs) | 
-                 (aux,vs,ys) <- prsAUX us xs,
-                 (inf,ws,zs) <- vpR vs ys,
-                  inf'       <- assignT Infl inf ] 
---}
 
 prsAUX :: SPARSER Cat Cat
 prsAUX = leafPS "AUX" <||> pop "AUX" 
@@ -836,8 +731,6 @@ prsAUX = leafPS "AUX" <||> pop "AUX"
 prsPP :: SPARSER Cat Cat
 prsPP = ppR <||> pop "PP" 
 
-
--- New ppR to consider
 ppR :: SPARSER Cat Cat
 ppR = \us xs -> 
   [ (Branch (Cat "_" "PP" fs []) [prep,np'], ws, zs) | 
@@ -845,15 +738,6 @@ ppR = \us xs ->
       (np,ws,zs)   <- prsNP vs ys,
        np'         <- assignT Acc np, 
        fs          <- combine (t2c prep) (t2c np') ]
-{--
-ppR :: SPARSER Cat Cat
-ppR = \us xs -> 
-  [ (Branch (Cat "_" "PP" fs []) [prep,np'], ws, zs) | 
-      (prep,vs,ys) <- prsPREP us xs, 
-      (np,ws,zs)   <- prsNP vs ys,
-       np'         <- assignT AccOrDat np, 
-       fs          <- combine (t2c prep) (t2c np') ]
---}
 
 prsPREP :: SPARSER Cat Cat
 prsPREP = leafPS "PREP"
@@ -884,22 +768,12 @@ relclauseR = \us xs ->
        gap        <- [Cat "#" "NP" fs []],
        (s,ws,zs)  <- push gap prsS vs ys ]
 
-       
--- Comparative?
 thatlessR :: SPARSER Cat Cat 
 thatlessR = \ us xs -> 
         [ (Branch (Cat "_" "COMP" [] []) [s], vs, ys) | 
            gap       <- [Cat "#" "NP" [Comp] []], 
            (s,vs,ys) <- push gap prsS us xs, 
            notElem Wh (fs (t2c s))                       ]
-{--
-thatlessR :: SPARSER Cat Cat 
-thatlessR = \ us xs -> 
-        [ (Branch (Cat "_" "COMP" [] []) [s], vs, ys) | 
-           gap       <- [Cat "#" "NP" [AccOrDat] []], 
-           (s,vs,ys) <- push gap prsS us xs, 
-           notElem Wh (fs (t2c s))                       ]
---}
 
 prsYN :: SPARSER Cat Cat 
 prsYN = \us xs -> 
@@ -1110,18 +984,6 @@ transW (Branch (Cat _ "PP" fs _) [prep,np])
       | Masc      `elem` fs = Rel "man"    [Var 0]
       | Fem       `elem` fs = Rel "woman"  [Var 0]
       | otherwise           = Rel "thing"  [Var 0]
-{--
-transW (Leaf (Cat _ "NP" fs _)) 
-      | Masc      `elem` fs = Rel "man"    [Var 0]
-      | Fem       `elem` fs = Rel "woman"  [Var 0]
-      | MascOrFem `elem` fs = Rel "person" [Var 0]
-      | otherwise           = Rel "thing"  [Var 0]
-transW (Branch (Cat _ "PP" fs _) [prep,np]) 
-      | Masc      `elem` fs = Rel "man"    [Var 0]
-      | Fem       `elem` fs = Rel "woman"  [Var 0]
-      | MascOrFem `elem` fs = Rel "person" [Var 0]
-      | otherwise           = Rel "thing"  [Var 0]
---}
 
 subst :: Term -> Term -> Term 
 subst x (Const name)         = Const name
