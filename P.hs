@@ -521,7 +521,7 @@ parseAux :: PARSER Cat Cat
 parseAux = leafP "AUX"
 
 parseVP :: PARSER Cat Cat 
-parseVP = finVpRule <|> infVpRule <|> endVpRule
+parseVP = finVpRule -- <|> infVpRule <|> endVpRule
 --parseVP = finPastVpRule <|> finPresVpRule <|> finFutVpRule <|> finPerfVpRule <|> auxVpRule
 
 -- Here is where the real headaches begin - the VP
@@ -537,7 +537,7 @@ vpRule = \xs ->
 superCombine :: ParseTree Cat Cat -> [ParseTree Cat Cat] -> [Agreement]
 superCombine cat1 catlist =
     concat (map (\x -> combine (t2c cat1) (t2c x)) catlist)
-    
+    {--
 infVpRule :: PARSER Cat Cat
 infVpRule = \xs -> 
  [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
@@ -545,10 +545,10 @@ infVpRule = \xs ->
    (xps,zs) <- parseInfs ys,
    fs       <- superCombine vp xps,
    and (map (\x -> agreeC vp x) xps)]
-   
+   --}
 parseInfVP :: PARSER Cat Cat
 parseInfVP = leafP "V" <|> infVpRule
-   
+   {--
 endVpRule :: PARSER Cat Cat
 endVpRule = \xs -> 
  [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
@@ -556,10 +556,10 @@ endVpRule = \xs ->
    (xps,zs) <- parseEnds ys,
    fs       <- superCombine vp xps,
    and (map (\x -> agreeC vp x) xps)]
-   
+   --}
 parseInfEndVP :: PARSER Cat Cat
 parseInfEndVP = leafP "V" <|> endVpRule <|> infVpRule
-   
+   {--
 finVpRule :: PARSER Cat Cat
 finVpRule = \xs -> 
  [ (Branch (Cat "_" "V" fs []) (vp:xps),zs) |  
@@ -567,7 +567,30 @@ finVpRule = \xs ->
    (xps,zs) <- parseFins ys,
    fs       <- superCombine vp xps,
    and (map (\x -> agreeC vp x) xps)]
+--}
+infVpRule :: PARSER Cat Cat
+infVpRule = \ xs -> 
+   [ (Branch (Cat "_" "V" fs []) [vp,inf],zs) | 
+     (vp,ys)  <- leafP "V" xs, 
+     (inf,zs) <- parseInf ys,
+      fs      <- combine (t2c vp) (t2c inf),
+      agreeC vp inf ]
+      
+endVpRule :: PARSER Cat Cat
+endVpRule = \ xs -> 
+   [ (Branch (Cat "_" "V" fs []) [vp,end],zs) | 
+     (vp,ys)  <- parseInfVP xs, 
+     (end,zs) <- parseEnd ys,
+      fs      <- combine (t2c vp) (t2c end),
+      agreeC vp end ]
 
+finVpRule :: PARSER Cat Cat
+finVpRule = \ xs -> 
+   [ (Branch (Cat "_" "V" fs []) [vp,fin],zs) | 
+     (vp,ys)  <- parseInfEndVP xs, 
+     (fin,zs) <- parseFin ys,
+      fs      <- combine (t2c vp) (t2c fin),
+      agreeC vp fin ]
 
    {--
 finRule :: PARSER Cat Cat
