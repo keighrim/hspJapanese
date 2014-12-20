@@ -176,9 +176,9 @@ lexicon "i"    = [Cat "i"     "V"   [Dan1, Anim, Stem] [],
                   -- final for Iadj
                   Cat "i"    "FIN"  [Neutr, Decl, Iadj, Stem] [], 
                   -- 'i' dan inflections for Dan5
-                  Cat "i"     "INF"  [Masu, Dan5] [], 
-                  Cat "i"     "INF"  [Te, Dan5] [],
-                  Cat "i"     "INF"  [Ta, Dan5] [], 
+                  Cat "i"     "INF"  [Stem, Tfmasu, Dan5] [], 
+                  Cat "i"     "INF"  [Stem, Tfte, Dan5] [],
+                  Cat "i"     "INF"  [Stem, Tfta, Dan5] [], 
                   Cat "i"     "INF"  [Desu, Iadj] []] 
 lexicon "mi"    = 
                    [Cat "mi"     "V"   [Dan1, Nai] [], 
@@ -237,7 +237,8 @@ lexicon "rare"= [Cat "rare"     "INF"  [Reru, Dan1, May, Tfstem] []]
 -- reru: passive
 -- ba: conditional
 -- masu/desu: polite
-lexicon "na"     = [Cat "na"     "END"  [Nai, Nega, Tpiadj, Tfstem] []]  
+--lexicon "na"     = [Cat "na"     "END"  [Nai, Nega, Tpiadj, Tfstem] []]  
+lexicon "na"     = [Cat "na"     "END"  [Nai, Tfstem, Tpiadj, Nega] []]  
 lexicon "nai"     = [Cat "nai"     "FIN"  [Nai, Nega, Tpiadj] []]  
 lexicon "se"     = [Cat "ser"     "END"  [Nai, Caus, Tpdan1, Tfstem] []]  
 
@@ -254,7 +255,7 @@ lexicon "ba"     = [Cat "ba"     "END"  [Reru, Hypo] []]
 -- you: let's ...
 -- te(V): connecting verbs
 lexicon "u"  = [Cat "u"  "FIN"  [Stem, Pres, Neutr, Decl, Dan5] [], -- 'u' dan inf
-                Cat "u"     "FIN"  [You, Dan5, Volit] []]    -- let's 'u'
+                Cat "u"  "FIN"  [You, Dan5, Volit] []]    -- let's 'u'
                 -- TODO: need a mark for COMPLETELY FINALIZED
 lexicon "ru"    = [Cat "ru"    "FIN"  [Stem, Pres, Neutr, Decl, Dan1] []]
 lexicon "te"     = [Cat "te"     "FIN"  [Te, Dan5] [], 
