@@ -302,9 +302,11 @@ transfrom s
 repFilter :: Cat -> Agreement -> [Agreement] -> [Agreement]
 repFilter cat filt feats
   | filt == repFormFs && length (filter (`elem` filt) (fs cat)) >= 1
-      = map (filter (not . (`elem` verbFormFs))) feats
+      = map (filter (not . (`elem` repFormFs)))
+             (map (filter (not . (`elem` verbFormFs))) feats)
   | filt == repTypeFs && length (filter (`elem` filt) (fs cat)) >= 1
-      = map (filter (not . (`elem` verbTypeFs))) feats
+      = map (filter (not . (`elem` repTypeFs)))
+             (map (filter (not . (`elem` verbTypeFs))) feats)
   -- | filt == repMoodFs && length (filter (`elem` filt) (fs cat)) >= 1
       -- = map (filter (not . (`elem` verbMoodFs))) feats
   | otherwise = feats
