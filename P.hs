@@ -243,14 +243,14 @@ modalFs    = [May,Must]
 postTypeFs = [Only,Until,On,With,By]
 verbFormFs = [Te,Ta,Nai,Masu,Desu,Reru,You,Stem]
 verbTypeFs = [Dan5,Dan1,Irre,Iadj,Nadj]
-verbMoodFs = [Decl,Intrg,Intrj,Imper,Hypo,Caus,Pass]
+verbMoodFs = [Intrg,Intrj,Imper,Hypo,Caus,Pass]
 honorifFs  = [Poli,Resp,Humb,Neutr,Unoff]
 animacyFs  = [Anim,Inanim]
 repTypeFs  = [Tpiadj,Tpdan5,Tpdan1]
 repFormFs  = [Tfstem, Tfnai, Tfte, Tfta, Tfmasu, Tfreru, Tfyou ]
-repMoodFs  = [Mddecl,Mdintrg]
+--repMoodFs  = [Mddecl,Mdintrg]
 
-gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy, repType, repMood, repForm
+gender, person, gcase, pronType, tense, postType, verbType, verbForm, verbMood, honorif, animacy, repType, repForm
      :: Agreement -> Agreement
 gender   = filter (`elem` genderFs)
 person   = filter (`elem` personFs)
@@ -266,7 +266,7 @@ honorif  = filter (`elem` honorifFs)
 animacy  = filter (`elem` animacyFs)
 repType  = filter (`elem` repTypeFs)
 repForm  = filter (`elem` repFormFs)
-repMood  = filter (`elem` repMoodFs)
+-- repMood  = filter (`elem` repMoodFs)
 
 instance Show Cat where
   show (Cat "_"  label agr subcatlist) = label ++ show agr
@@ -287,18 +287,17 @@ subcatList (Cat _ _ _ cats) = cats
 
 transfrom :: Feat -> Feat
 transfrom s
-  | s == Mdintrg = Intrg
   | s == Tpdan5 = Dan5
   | s == Tpdan1 = Dan1
   | s == Tpiadj = Iadj
   | s == Tfstem = Stem
-  | s == Tfnai = Nai
-  | s == Tfte = Te
-  | s == Tfta = Ta
+  | s == Tfnai  = Nai
+  | s == Tfte   = Te
+  | s == Tfta   = Ta
   | s == Tfmasu = Masu
   | s == Tfreru = Reru
-  | s == Tfyou = You
-  | otherwise = Decl
+  | s == Tfyou  = You
+  | otherwise   = Wh
 
 repFilter :: Cat -> Agreement -> [Agreement] -> [Agreement]
 repFilter cat filt feats
@@ -306,8 +305,8 @@ repFilter cat filt feats
       = map (filter (not . (`elem` verbFormFs))) feats
   | filt == repTypeFs && length (filter (`elem` filt) (fs cat)) >= 1
       = map (filter (not . (`elem` verbTypeFs))) feats
-  | filt == repMoodFs && length (filter (`elem` filt) (fs cat)) >= 1
-      = map (filter (not . (`elem` verbMoodFs))) feats
+  -- | filt == repMoodFs && length (filter (`elem` filt) (fs cat)) >= 1
+      -- = map (filter (not . (`elem` verbMoodFs))) feats
   | otherwise = feats
 
 combine :: Cat -> Cat -> [Agreement]
@@ -316,11 +315,13 @@ combine cat1 cat2
       = map (++ (map transfrom replace))
         (repFilter cat2 repTypeFs 
          (repFilter cat2 repFormFs
-          (repFilter cat2 repMoodFs 
-           (rawCombine (fs cat1 ++ fs cat2)) ) ) )
+          --(repFilter cat2 repMoodFs 
+           (rawCombine (fs cat1 ++ fs cat2)) ) ) 
+        -- )
   | otherwise 
       = rawCombine (fs cat1 ++ fs cat2)
- where replace = (repType (fs cat2) ++ repForm (fs cat2) ++ repMood (fs cat2))
+ where replace = (repType (fs cat2) ++ repForm (fs cat2) )
+ -- ++ repMood (fs cat2))
 
 rawCombine :: Agreement -> [Agreement]
 rawCombine fss = 
@@ -332,7 +333,7 @@ rawCombine fss =
            length (postType feats) <= 1,
            length (verbType feats) <= 1,
            length (verbForm feats) <= 1,
-           length (verbMood feats) <= 1,
+           --length (verbMood feats) <= 1,
            length (honorif  feats) <= 1,
            length (animacy  feats) <= 1]
   where 
