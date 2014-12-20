@@ -434,11 +434,14 @@ npRule :: PARSER Cat Cat
 npRule = \ xs -> 
   [ (Branch (Cat "_" "N" fs []) [det,np],zs) | 
     (det,ys) <- parseDET xs, 
-    (np,zs)  <- parseNP  ys,
+    (np,zs)  <- parseN  ys,
     fs       <- combine (t2c det) (t2c np) ]
 
 parseNP :: PARSER Cat Cat
-parseNP = leafP "N"
+parseNP = parseN <|> npRule
+
+parseN :: PARSER Cat Cat
+parseN = leafP "N"
 
 parseDET :: PARSER Cat Cat
 parseDET = leafP "DET"
